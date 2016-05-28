@@ -1,0 +1,22 @@
+1. Compile the code to get Server.jar and Client.jar
+2. Run Server.jar with parameters  
+   files\final_comp\rddl 2224 20 1 60 0
+   Arguments
+   files\final_comp\rddl: the folder where RDDL files are. The RDDL problems that we test on in the papar are all in src\files\final_comp\rddl. You may need to change                           \ to / according to your system.
+   2224:                  port used for communication between Client and Server
+   20:			  rounds to run
+   1:			  random seed
+   60:                    time per step in seconds
+   0:                     used in our experiment, you can always set it to be 0
+3  Run Client.jar with parameters
+   files\final_comp\rddl\ Localhost RevAccGradient rddl.policy.HD_ACA 2224 1 academic_advising 60 20 20
+   files\final_comp\rddl: the folder where RDDL files are. The RDDL problems that we test on in the papar are all in src\files\final_comp\rddl. You may need to change                            \ to / according to your system. Here we use the same directory as in Server.
+   Localhost:             Server host name.
+   RevAccGradient:        Client name
+   rddl.policy.RevAccGradient: You should keep it as it is
+   2224:                  port to communicate with the server, should be the same as used in server
+   1:                     random seed, should be the same as used in server
+   academic_advising: domain name. could be academic_advising, sysadmin, elevators, traffic, tamarisk, skill_teaching, as in our paper
+   60:		          timer per step
+   20 20:                 the instance index from 1-20. The two numbers could be confusing, but you can keep them the same (the index)   
+   
