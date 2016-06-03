@@ -1,22 +1,55 @@
-1. Compile the code to get Server.jar and Client.jar
+
+
+OVERVIEW
+
+This project includes the code for the SOGBOFA stochastic planning algorithm as well as the ARollout stochastic planning algorithm as described in the following papers. See  
+         http://www.cs.tufts.edu/research/ml/index.php?op=pubs
+
+H. Cui and R. Khardon, Online Symbolic Gradient-Based Optimization for Factored Action MDPs, International Joint Conference on Artificial Intelligence (IJCAI), 2016 
+
+H. Cui, R. Khardon, A. Fern, and P. Tadepalli., Factored MCTS for Large Scale Stochastic Planning. , Proceedings of the AAAI Conference on Artificial Intelligence (AAAI), 2015  
+
+SOGBOFA and ARollout use input in the RDDL language and have been implemented by modifying some of the original code of the RDDL simulator
+   https://github.com/ssanner/rddlsim
+Since our code integrates into an older version of RDDL we provide the entire code base here.
+
+We provide the planning algorithms code as well as the test domains and challenge problems as used in the IJCAI paper.
+
+
+HOW TO USE THE CODE: SOGBOFA 
+
+1. Run Compile.bat to compile the code to get all jar files needed
+
 2. Run Server.jar with parameters  
-   files\final_comp\rddl 2224 20 1 60 0
+   ../../../ 2224 20 1 60 0
    Arguments
-   files\final_comp\rddl: the folder where RDDL files are. The RDDL problems that we test on in the papar are all in src\files\final_comp\rddl. You may need to change                           \ to / according to your system.
+   ../../../: the folder where RDDL files are. The RDDL problems that we test on in the paper are all in the directory. You may need to change \ to / according to your system.
    2224:                  port used for communication between Client and Server
    20:			  rounds to run
    1:			  random seed
    60:                    time per step in seconds
-   0:                     used in our experiment, you can always set it to be 0
+   0:                     This is a parameter used in our experiments. Please set it to 0.
+
 3  Run Client.jar with parameters
-   files\final_comp\rddl\ Localhost RevAccGradient rddl.policy.HD_ACA 2224 1 academic_advising 60 20 20
-   files\final_comp\rddl: the folder where RDDL files are. The RDDL problems that we test on in the papar are all in src\files\final_comp\rddl. You may need to change                            \ to / according to your system. Here we use the same directory as in Server.
+   ../../../ Localhost RevAccGradient rddl.policy.RevAccGradient 2224 1 academic_advising 60 20 20
+   ../../../: the folder where RDDL files are. The RDDL problems that we test on in the paper are all in the directory. You may need to change \ to / according to your system. Here we use the same directory as in Server.
    Localhost:             Server host name.
    RevAccGradient:        Client name
    rddl.policy.RevAccGradient: You should keep it as it is
    2224:                  port to communicate with the server, should be the same as used in server
    1:                     random seed, should be the same as used in server
    academic_advising: domain name. could be academic_advising, sysadmin, elevators, traffic, tamarisk, skill_teaching, as in our paper
-   60:		          timer per step
-   20 20:                 the instance index from 1-20. The two numbers could be confusing, but you can keep them the same (the index)   
+   60:		          time per step
+   20 20:                 the instance index from 1-20 in the corresponding domain. Please repeat the instance index twice in the argument list.  
    
+
+This will run the SOGBOFA client 20 times on the corresponding instance from the specified domain. The RDDL simulator outputs the sequence of steps and rewards that can be collected to obtain the results in the paper.
+
+HOW TO USE THE CODE: ARollout
+
+The only modification needed is to change the arguments to the client program as follows:
+ ../../../ Localhost ARollout rddl.policy.NYYR11 2224 1 academic_advising 60 20 20
+
+
+HOW TO USE THE CODE: new domains and/or instances
+You can run any RDDL instances with specified directory and name. However so far we only support RDDL, not RDDL2, which is a later version than the simulator we work with.
