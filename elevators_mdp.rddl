@@ -154,7 +154,7 @@ domain elevators_mdp {
 	};
 }
 
-non-fluents nf_elevators_inst_mdp__1 {
+non-fluents nf_elevators_inst_mdp__1{
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0};
@@ -164,10 +164,8 @@ non-fluents nf_elevators_inst_mdp__1 {
 		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
 		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
 		ADJACENT-UP(f0,f1) = true;
-		ARRIVE-PARAM(f1) = 0.14635538;
+		ARRIVE-PARAM(f1) = 0.02;
 		ADJACENT-UP(f1,f2) = true;
-		ARRIVE-PARAM(f2) = 0.14635538;
-
 		TOP-FLOOR(f2) = true;
 		BOTTOM-FLOOR(f0) = true;
  	}; 
@@ -177,15 +175,11 @@ instance elevators_inst_mdp__1 {
  	non-fluents = nf_elevators_inst_mdp__1;
 	init-state { 
 		elevator-at-floor(e0,f0);
-
 	};
 	max-nondef-actions = 1;
-	horizon = 3;
+	horizon = 30;
 	discount = 1.0;
 } 
-
-
-
 
 non-fluents nf_elevators_inst_mdp__2 {
 	domain = elevators_mdp; 
@@ -532,221 +526,8 @@ instance elevators_inst_mdp__10 {
 	discount = 1.0;
 } 
 
+
 non-fluents nf_elevators_inst_mdp__11 {
-	domain = elevators_mdp; 
-	objects { 
-		elevator : {e0,e1,e2,e3};
-		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12 }; 
-	}; 
-	non-fluents {
-		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
-		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
-		ADJACENT-UP(f0,f1) = true;
-		ARRIVE-PARAM(f1) = 0.049790196;
-		ADJACENT-UP(f1,f2) = true;
-		ARRIVE-PARAM(f2) = 0.015877005;
-		ADJACENT-UP(f2,f3) = true;
-		ARRIVE-PARAM(f3) = 0.021916494;
-		ADJACENT-UP(f3,f4) = true;
-		ARRIVE-PARAM(f4) = 0.029466419;
-		ADJACENT-UP(f4,f5) = true;
-		ARRIVE-PARAM(f5) = 0.027768208;
-		ADJACENT-UP(f5,f6) = true;
-		ARRIVE-PARAM(f6) = 0.049088173;
-		ADJACENT-UP(f6,f7) = true;
-		ARRIVE-PARAM(f7) = 0.010399019;
-		ADJACENT-UP(f7,f8) = true;
-		ARRIVE-PARAM(f8) = 0.048392333;
-		ADJACENT-UP(f8,f9) = true;
-		ARRIVE-PARAM(f9) = 0.027681649;
-		ADJACENT-UP(f9,f10) = true;
-		ARRIVE-PARAM(f10) = 0.033308525;
-		ADJACENT-UP(f10,f11) = true;
-		ARRIVE-PARAM(f11) = 0.017117884;
-		ADJACENT-UP(f11,f12) = true;
-		TOP-FLOOR(f12) = true;
-		BOTTOM-FLOOR(f0) = true;
- 	}; 
- }
-instance elevators_inst_mdp__11 { 
-	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__11;
-	init-state { 
-		elevator-at-floor(e0,f0);
-		elevator-at-floor(e1,f0);
-		elevator-at-floor(e2,f0);
-		elevator-at-floor(e3,f0);
-	};
-	max-nondef-actions = 4;
-	horizon = 30;
-	discount = 1.0;
-} 
-
-non-fluents nf_elevators_inst_mdp__12 {
-	domain = elevators_mdp; 
-	objects { 
-		elevator : {e0,e1,e2,e3};
-		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13 }; 
-	}; 
-	non-fluents {
-		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
-		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
-		ADJACENT-UP(f0,f1) = true;
-		ARRIVE-PARAM(f1) = 0.04009797;
-		ADJACENT-UP(f1,f2) = true;
-		ARRIVE-PARAM(f2) = 0.039873824;
-		ADJACENT-UP(f2,f3) = true;
-		ARRIVE-PARAM(f3) = 0.02751564;
-		ADJACENT-UP(f3,f4) = true;
-		ARRIVE-PARAM(f4) = 0.033349536;
-		ADJACENT-UP(f4,f5) = true;
-		ARRIVE-PARAM(f5) = 0.01006716;
-		ADJACENT-UP(f5,f6) = true;
-		ARRIVE-PARAM(f6) = 0.042854324;
-		ADJACENT-UP(f6,f7) = true;
-		ARRIVE-PARAM(f7) = 0.031281874;
-		ADJACENT-UP(f7,f8) = true;
-		ARRIVE-PARAM(f8) = 0.020211719;
-		ADJACENT-UP(f8,f9) = true;
-		ARRIVE-PARAM(f9) = 0.029367875;
-		ADJACENT-UP(f9,f10) = true;
-		ARRIVE-PARAM(f10) = 0.018395698;
-		ADJACENT-UP(f10,f11) = true;
-		ARRIVE-PARAM(f11) = 0.048194267;
-		ADJACENT-UP(f11,f12) = true;
-		ARRIVE-PARAM(f12) = 0.039248604;
-		ADJACENT-UP(f12,f13) = true;
-		TOP-FLOOR(f13) = true;
-		BOTTOM-FLOOR(f0) = true;
- 	}; 
- }
-instance elevators_inst_mdp__12 { 
-	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__12;
-	init-state { 
-		elevator-at-floor(e0,f0);
-		elevator-at-floor(e1,f0);
-		elevator-at-floor(e2,f0);
-		elevator-at-floor(e3,f0);
-	};
-	max-nondef-actions = 4;
-	horizon = 30;
-	discount = 1.0;
-} 
-
-non-fluents nf_elevators_inst_mdp__13 {
-	domain = elevators_mdp; 
-	objects { 
-		elevator : {e0,e1,e2,e3,e4};
-		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14 }; 
-	}; 
-	non-fluents {
-		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
-		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
-		ADJACENT-UP(f0,f1) = true;
-		ARRIVE-PARAM(f1) = 0.025760949;
-		ADJACENT-UP(f1,f2) = true;
-		ARRIVE-PARAM(f2) = 0.02037183;
-		ADJACENT-UP(f2,f3) = true;
-		ARRIVE-PARAM(f3) = 0.0134026455;
-		ADJACENT-UP(f3,f4) = true;
-		ARRIVE-PARAM(f4) = 0.017115958;
-		ADJACENT-UP(f4,f5) = true;
-		ARRIVE-PARAM(f5) = 0.04158295;
-		ADJACENT-UP(f5,f6) = true;
-		ARRIVE-PARAM(f6) = 0.045761354;
-		ADJACENT-UP(f6,f7) = true;
-		ARRIVE-PARAM(f7) = 0.021549154;
-		ADJACENT-UP(f7,f8) = true;
-		ARRIVE-PARAM(f8) = 0.04335712;
-		ADJACENT-UP(f8,f9) = true;
-		ARRIVE-PARAM(f9) = 0.041558914;
-		ADJACENT-UP(f9,f10) = true;
-		ARRIVE-PARAM(f10) = 0.011458897;
-		ADJACENT-UP(f10,f11) = true;
-		ARRIVE-PARAM(f11) = 0.046690702;
-		ADJACENT-UP(f11,f12) = true;
-		ARRIVE-PARAM(f12) = 0.023133194;
-		ADJACENT-UP(f12,f13) = true;
-		ARRIVE-PARAM(f13) = 0.017807577;
-		ADJACENT-UP(f13,f14) = true;
-		TOP-FLOOR(f14) = true;
-		BOTTOM-FLOOR(f0) = true;
- 	}; 
- }
-instance elevators_inst_mdp__13 { 
-	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__13;
-	init-state { 
-		elevator-at-floor(e0,f0);
-		elevator-at-floor(e1,f0);
-		elevator-at-floor(e2,f0);
-		elevator-at-floor(e3,f0);
-		elevator-at-floor(e4,f0);
-	};
-	max-nondef-actions = 5;
-	horizon = 30;
-	discount = 1.0;
-} 
-
-non-fluents nf_elevators_inst_mdp__14 {
-	domain = elevators_mdp; 
-	objects { 
-		elevator : {e0,e1,e2,e3,e4};
-		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15 }; 
-	}; 
-	non-fluents {
-		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
-		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
-		ADJACENT-UP(f0,f1) = true;
-		ARRIVE-PARAM(f1) = 0.017788012;
-		ADJACENT-UP(f1,f2) = true;
-		ARRIVE-PARAM(f2) = 0.023564685;
-		ADJACENT-UP(f2,f3) = true;
-		ARRIVE-PARAM(f3) = 0.043178745;
-		ADJACENT-UP(f3,f4) = true;
-		ARRIVE-PARAM(f4) = 0.015293383;
-		ADJACENT-UP(f4,f5) = true;
-		ARRIVE-PARAM(f5) = 0.01416833;
-		ADJACENT-UP(f5,f6) = true;
-		ARRIVE-PARAM(f6) = 0.025433892;
-		ADJACENT-UP(f6,f7) = true;
-		ARRIVE-PARAM(f7) = 0.03454554;
-		ADJACENT-UP(f7,f8) = true;
-		ARRIVE-PARAM(f8) = 0.042163357;
-		ADJACENT-UP(f8,f9) = true;
-		ARRIVE-PARAM(f9) = 0.01321083;
-		ADJACENT-UP(f9,f10) = true;
-		ARRIVE-PARAM(f10) = 0.016456384;
-		ADJACENT-UP(f10,f11) = true;
-		ARRIVE-PARAM(f11) = 0.016207188;
-		ADJACENT-UP(f11,f12) = true;
-		ARRIVE-PARAM(f12) = 0.040168125;
-		ADJACENT-UP(f12,f13) = true;
-		ARRIVE-PARAM(f13) = 0.041803353;
-		ADJACENT-UP(f13,f14) = true;
-		ARRIVE-PARAM(f14) = 0.02248304;
-		ADJACENT-UP(f14,f15) = true;
-		TOP-FLOOR(f15) = true;
-		BOTTOM-FLOOR(f0) = true;
- 	}; 
- }
-instance elevators_inst_mdp__14 { 
-	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__14;
-	init-state { 
-		elevator-at-floor(e0,f0);
-		elevator-at-floor(e1,f0);
-		elevator-at-floor(e2,f0);
-		elevator-at-floor(e3,f0);
-		elevator-at-floor(e4,f0);
-	};
-	max-nondef-actions = 5;
-	horizon = 30;
-	discount = 1.0;
-} 
-
-non-fluents nf_elevators_inst_mdp__15 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4};
@@ -790,9 +571,9 @@ non-fluents nf_elevators_inst_mdp__15 {
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__15 { 
+instance elevators_inst_mdp__11 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__15;
+ 	non-fluents = nf_elevators_inst_mdp__11;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
@@ -805,7 +586,7 @@ instance elevators_inst_mdp__15 {
 	discount = 1.0;
 } 
 
-non-fluents nf_elevators_inst_mdp__16 {
+non-fluents nf_elevators_inst_mdp__12 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4,e5};
@@ -851,9 +632,9 @@ non-fluents nf_elevators_inst_mdp__16 {
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__16 { 
+instance elevators_inst_mdp__12 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__16;
+ 	non-fluents = nf_elevators_inst_mdp__12;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
@@ -867,7 +648,7 @@ instance elevators_inst_mdp__16 {
 	discount = 1.0;
 } 
 
-non-fluents nf_elevators_inst_mdp__17 {
+non-fluents nf_elevators_inst_mdp__13 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4,e5};
@@ -915,9 +696,9 @@ non-fluents nf_elevators_inst_mdp__17 {
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__17 { 
+instance elevators_inst_mdp__13 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__17;
+ 	non-fluents = nf_elevators_inst_mdp__13;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
@@ -931,7 +712,7 @@ instance elevators_inst_mdp__17 {
 	discount = 1.0;
 } 
 
-non-fluents nf_elevators_inst_mdp__18 {
+non-fluents nf_elevators_inst_mdp__14 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4,e5};
@@ -981,9 +762,9 @@ non-fluents nf_elevators_inst_mdp__18 {
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__18 { 
+instance elevators_inst_mdp__14 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__18;
+ 	non-fluents = nf_elevators_inst_mdp__14;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
@@ -997,7 +778,7 @@ instance elevators_inst_mdp__18 {
 	discount = 1.0;
 } 
 
-non-fluents nf_elevators_inst_mdp__19 {
+non-fluents nf_elevators_inst_mdp__15 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4,e5,e6};
@@ -1049,9 +830,9 @@ non-fluents nf_elevators_inst_mdp__19 {
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__19 { 
+instance elevators_inst_mdp__15 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__19;
+ 	non-fluents = nf_elevators_inst_mdp__15;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
@@ -1066,7 +847,7 @@ instance elevators_inst_mdp__19 {
 	discount = 1.0;
 } 
 
-non-fluents nf_elevators_inst_mdp__20 {
+non-fluents nf_elevators_inst_mdp__16 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4,e5,e6};
@@ -1120,9 +901,9 @@ non-fluents nf_elevators_inst_mdp__20 {
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__20 { 
+instance elevators_inst_mdp__16 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__20;
+ 	non-fluents = nf_elevators_inst_mdp__16;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
@@ -1137,7 +918,7 @@ instance elevators_inst_mdp__20 {
 	discount = 1.0;
 } 
 
-non-fluents nf_elevators_inst_mdp__21 {
+non-fluents nf_elevators_inst_mdp__17 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10};
@@ -1214,9 +995,9 @@ ADJACENT-UP(f31,f32) = true;
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__21 { 
+instance elevators_inst_mdp__17 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__21;
+ 	non-fluents = nf_elevators_inst_mdp__17;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
@@ -1235,7 +1016,7 @@ elevator-at-floor(e7,f0);
 	discount = 1.0;
 } 
 
-non-fluents nf_elevators_inst_mdp__22 {
+non-fluents nf_elevators_inst_mdp__18 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11};
@@ -1318,9 +1099,9 @@ ADJACENT-UP(f34,f35) = true;
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__22 { 
+instance elevators_inst_mdp__18 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__22;
+ 	non-fluents = nf_elevators_inst_mdp__18;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
@@ -1340,7 +1121,7 @@ elevator-at-floor(e11,f0);
 	discount = 1.0;
 } 
 
-non-fluents nf_elevators_inst_mdp__23 {
+non-fluents nf_elevators_inst_mdp__19 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12};
@@ -1429,9 +1210,9 @@ ADJACENT-UP(f37,f38) = true;
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__23 { 
+instance elevators_inst_mdp__19 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__23;
+ 	non-fluents = nf_elevators_inst_mdp__19;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
@@ -1453,7 +1234,7 @@ elevator-at-floor(e12,f0);
 	discount = 1.0;
 } 
 
-non-fluents nf_elevators_inst_mdp__24 {
+non-fluents nf_elevators_inst_mdp__20 {
 	domain = elevators_mdp; 
 	objects { 
 		elevator : {e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13};
@@ -1548,9 +1329,9 @@ ADJACENT-UP(f40,f41) = true;
 		BOTTOM-FLOOR(f0) = true;
  	}; 
  }
-instance elevators_inst_mdp__24 { 
+instance elevators_inst_mdp__20 { 
 	domain = elevators_mdp; 
- 	non-fluents = nf_elevators_inst_mdp__24;
+ 	non-fluents = nf_elevators_inst_mdp__20;
 	init-state { 
 		elevator-at-floor(e0,f0);
 		elevator-at-floor(e1,f0);
