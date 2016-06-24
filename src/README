@@ -20,19 +20,19 @@ HOW TO USE THE CODE: SOGBOFA
 
 1. We recommand using Eclipse IDE to compile and run the code
 
-2. Compile and run Server.java, or directly run Server.jar with arguments
+2. Compile and run Server.java, or directly run Server.jar from download with arguments
    ../../../ 2224 20 1 60 0
    Arguments
-   ../../../: the folder where RDDL files are. The RDDL problems that we test on in the paper are all in the directory. You may need to change \ to / according to your system.
+   ../../../: the folder where RDDL files are. The RDDL problems that we test on in the paper are all in the directory. If you are using Server.jar and Client.jar, the instances files are just in the same directory. You may need to change \ to / according to your system.
    2224:                  port used for communication between Client and Server
    20:			  rounds to run
    1:			  random seed
    60:                    time per step in seconds
    0:                     This is a parameter used in our experiments. Please set it to 0.
 
-3  Compile and run Server.java, or directly run Server.jar with arguments
-   ../../../ Localhost RevAccGradient rddl.policy.RevAccGradient 2224 1 academic_advising 60 20 20
-   ../../../: the folder where RDDL files are. The RDDL problems that we test on in the paper are all in the directory. You may need to change \ to / according to your system. Here we use the same directory as in Server.
+3  Compile and run Server.java, or directly run Server.jar from download with arguments
+   ./ Localhost RevAccGradient rddl.policy.RevAccGradient 2224 1 academic_advising 60 20 20
+   ./: the folder where RDDL files are. The RDDL problems that we test on in the paper are all in the directory. If you are using Server.jar and Client.jar, the instances files are just in the same directory. You may need to change \ to / according to your system. Here we use the same directory as in Server.
    Localhost:             Server host name.
    RevAccGradient:        Client name
    rddl.policy.RevAccGradient: You should keep it as it is
