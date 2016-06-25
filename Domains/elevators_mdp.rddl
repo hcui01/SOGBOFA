@@ -1,0 +1,1356 @@
+domain elevators_mdp {
+	
+	requirements = { 
+		constrained-state,
+		reward-deterministic
+	};
+	
+	types {
+  		elevator : object;
+ 	  	floor    : object;
+	}; 
+	
+	pvariables { 
+	
+		// Probability someone arrives at the floor (up or down)
+		ARRIVE-PARAM(floor) : { non-fluent, real, default = 0.0 }; 		  		
+		
+		// Penalty for persons in the elevator going in right/wrong direction
+		// Note: a constant 1.0 penalty for people waiting at a floor 
+		ELEVATOR-PENALTY-RIGHT-DIR : { non-fluent, real, default = 0.5 };
+		ELEVATOR-PENALTY-WRONG-DIR : { non-fluent, real, default = 3.0 };
+
+		// Useful definitions
+		TOP-FLOOR(elevator, floor)          : { non-fluent, bool, default = false };
+   		BOTTOM-FLOOR(elevator, floor)       : { non-fluent, bool, default = false };
+		ADJACENT-UP(floor, floor) : { non-fluent, bool, default = false };
+		BEFORE(elevator, elevator) : { non-fluent, bool, default = false };
+		
+		CAN(elevator, floor) : { non-fluent, bool, default = true }; 		  		
+		
+		person-waiting-up(floor)   : { state-fluent, bool, default = false };
+		person-in-elevator-going-up(elevator)   : { state-fluent, bool, default = false };
+		
+		elevator-at-floor(elevator, floor) : { state-fluent, bool, default = false };
+		elevator-dir-up(elevator) : { state-fluent, bool, default = true };
+
+		move-up(elevator)     : { action-fluent, bool, default = false };
+		move-down(elevator)   : { action-fluent, bool, default = false };
+		change-dir(elevator) : { action-fluent, bool, default = false };
+		
+	};
+  
+	cpfs {
+		
+		person-waiting-up'(?f) = 
+			if (person-waiting-up(?f) ^ 
+				~exists_{?e: elevator} [ CAN(?e,?f) ^ elevator-at-floor(?e, ?f) ^ 
+					elevator-dir-up(?e) ])
+			then KronDelta(true) 
+			else Bernoulli(ARRIVE-PARAM(?f));
+			
+  		person-in-elevator-going-up'(?e) = 
+  			if (person-in-elevator-going-up(?e))
+  				then KronDelta( ~exists_{?f : floor} [CAN(?e, ?f) ^ 
+  					elevator-at-floor(?e, ?f) ^ TOP-FLOOR(?e,?f)] )
+  			else
+  				KronDelta( exists_{?f : floor} 
+  					[ CAN(?e, ?f) ^ elevator-at-floor(?e, ?f) ^ person-waiting-up(?f) ^ elevator-dir-up(?e) 
+  						^ ( ~exists_{?e2 : elevator} [ BEFORE(?e2,?e) ^ CAN(?e2, ?f) 
+  							^ elevator-at-floor(?e2,?f) ^ elevator-dir-up(?e2) ]) ] );
+
+		elevator-at-floor'(?e, ?f) =
+		
+			if ( CAN(?e, ?f) ^ elevator-at-floor(?e, ?f) 
+				^ move-up(?e) ^ exists_{?above : floor} 
+					 [ADJACENT-UP(?f, ?above) ^ CAN(?e, ?above) ])
+				then KronDelta(false)
+			else if ( CAN(?e, ?f) ^ elevator-at-floor(?e, ?f) ^ move-down(?e) 
+				^ exists_{?below : floor} 
+						[ADJACENT-UP(?below, ?f) ^ CAN(?e, ?below) ])
+				then KronDelta(false)
+			else if ( CAN(?e, ?f) ^ move-up(?e) 
+				^ exists_{?cur : floor}[ CAN(?e, ?cur) ^ elevator-at-floor(?e, ?cur) ^ 
+					ADJACENT-UP(?cur, ?f) ] )
+				then KronDelta(true)
+			else if ( CAN(?e, ?f) ^ move-down(?e) 
+				^ exists_{?cur : floor}[ CAN(?e, ?cur) ^ elevator-at-floor(?e, ?cur) 
+				^ ADJACENT-UP(?f, ?cur) ] )
+				then KronDelta(true)
+			else if( CAN(?e, ?f) )
+				then KronDelta( elevator-at-floor(?e, ?f) )
+			else KronDelta(false);
+			
+		elevator-dir-up'(?e) =
+			if( exists_{?f : floor} [ CAN(?e, ?f) ^ elevator-at-floor(?e, ?f) ^ TOP-FLOOR(?e, ?f) ] )
+				then KronDelta(false)
+			else if( exists_{?f : floor} [ CAN(?e, ?f) ^ elevator-at-floor(?e, ?f) ^ BOTTOM-FLOOR(?e, ?f) ] )
+				then KronDelta(true)
+			else if( move-up(?e) )
+				then KronDelta(true)
+			else if( move-down(?e) )
+				then KronDelta(false)
+			else if( change-dir(?e) )
+				then KronDelta( ~elevator-dir-up(?e) )
+			else KronDelta( elevator-dir-up(?e) );	
+	};
+  
+  	// Reward is a sum of waiting penalties for those in elevators and at floor
+	reward = 
+		[sum_{?e: elevator} [
+			-ELEVATOR-PENALTY-RIGHT-DIR * 
+				(person-in-elevator-going-up(?e)*elevator-dir-up(?e)) 
+			-ELEVATOR-PENALTY-WRONG-DIR *
+				(person-in-elevator-going-up(?e)*~elevator-dir-up(?e))
+		]] +
+		[sum_{?f: floor} [
+			- person-waiting-up(?f)
+		]];
+
+	state-action-constraints {
+		// Can check uniqueness constraint in many ways, but for simulator easiest 
+		// is just to count.
+		//forall_{?e : elevator} ([sum_{?f: floor} elevator-at-floor(?e, ?f)] == 1);
+		
+		// Max of one action per elevator.
+		forall_{?e : elevator} [(move-up(?e) + move-down(?e) + change-dir(?e)) <= 1];
+		
+		//can
+		forall_{?e : elevator, ?f : floor} [ elevator-at-floor(?e,?f) => CAN(?e, ?f) ];
+		
+		//forall_{?e : elevator, ?f : floor} [ elevator-at-floor(?e,?f) ^ TOP-FLOOR(?f) => ~elevator-dir-up(?e) ];
+		
+		//forall_{?e : elevator, ?f : floor} [ elevator-at-floor(?e,?f) ^ BOTTOM-FLOOR(?f) => elevator-dir-up(?e) ];		 
+	
+		//forall_{?f : floor} [ TOP-FLOOR(?f) => ~person-waiting-up(?f) ];
+		
+		//forall_{?f : floor} [ BOTTOM-FLOOR(?f) => ~person-waiting-down(?f) ];
+			
+		//forall_{?e : elevator, ?f : floor, ?b : building} [ elevator-at-floor(?e,?f) ^ ELEVATOR-BUILDING(?e, ?b) => FLOOR-BUILDING(?f, ?b) ];
+		
+		
+		// All floors except top and bottom must have one adjacent floor above/below
+//		forall_{?f : floor} [ TOP-FLOOR(?f) | (sum_{?fup : floor} ADJACENT-UP(?f,?fup)) == 1 ];
+//		forall_{?f : floor} [ BOTTOM-FLOOR(?f) | (sum_{?fdown : floor} ADJACENT-UP(?fdown,?f)) == 1 ];
+
+//		forall_{?e : elevator, ?f : floor} [ (~(ARRIVE-PARAM(?f) == 0)) ^ elevator-at-floor(?e, ?f) ^ elevator-dir-up(?e) ^ ~person-waiting-up(?f) => ~open-door-going-up(?e)];
+//		forall_{?e : elevator, ?f : floor} [ (~(ARRIVE-PARAM(?f) == 0)) ^ elevator-at-floor(?e, ?f) ^ ~elevator-dir-up(?e) ^ ~person-waiting-down(?f) => ~open-door-going-down(?e)];
+//		forall_{?f : floor} [ TOP-FLOOR(?f) => [ forall_{?e : elevator} [ elevator-dir-up(?e) ^ elevator-at-floor(?e,?f) => open-door-going-down(?e) ] ] ];
+//		forall_{?f : floor} [ TOP-FLOOR(?f) => [ forall_{?e : elevator} [ ~elevator-closed(?e) ^ ~elevator-dir-up(?e) ^ elevator-at-floor(?e,?f) => close-door(?e) ] ] ];
+
+//		forall_{?f : floor} [ TOP-FLOOR(?f) => [ forall_{?e : elevator} [ elevator-closed(?e) ^ ~elevator-dir-up(?e) ^ elevator-at-floor(?e,?f) => move-current-dir(?e) ] ] ];
+//		forall_{?f : floor} [ BOTTOM-FLOOR(?f) => [ forall_{?e : elevator} [ ~elevator-dir-up(?e) ^ elevator-at-floor(?e,?f) => open-door-going-up(?e) ] ] ];
+
+//		forall_{?f : floor} [ BOTTOM-FLOOR(?f) => [ forall_{?e : elevator} [ ~elevator-closed(?e) ^ elevator-dir-up(?e) ^ elevator-at-floor(?e,?f) => close-door(?e) ] ] ];
+//		forall_{?f : floor} [ BOTTOM-FLOOR(?f) => [ forall_{?e : elevator} [ elevator-closed(?e) ^ elevator-dir-up(?e) ^ elevator-at-floor(?e,?f) => move-current-dir(?e) ] ] ];
+
+//		forall_{?f : floor} [ TOP-FLOOR(?f) => [ forall_{?e : elevator} [ elevator-at-floor(?e,?f)^person-in-elevator-going-up(?e) => open-door-going-up(?e) ] ] ];
+//		forall_{?f : floor} [ TOP-FLOOR(?f) => [ forall_{?e : elevator} [ elevator-at-floor(?e,?f) ^ ~person-in-elevator-going-up(?e) ^ ~elevator-closed(?e) => open-door-going-down(?e) ] ] ];
+//		forall_{?f : floor} [ BOTTOM-FLOOR(?f) => [ forall_{?e : elevator} [ elevator-at-floor(?e,?f) ^ ~person-in-elevator-going-up(?e) ^ ~elevator-dir-up(?e) ^ elevator-closed(?e) => move-current-dir(?e) ] ] ];
+//			forall_{?f : floor} [ BOTTOM-FLOOR(?f) => [ forall_{?e : elevator} [ elevator-at-floor(?e,?f) => ~open-door-going-down(?e) ] ] ];
+//		forall_{?e  : elevator} [ person-in-elevator-going-up(?e) ^ elevator-dir-up(?e) => ~open-door-going-down(?e) ];
+//		forall_{?e : elevator} [ person-in-elevator-going-down(?e) ^ ~elevator-dir-up(?e) => ~open-door-going-up(?e) ];
+//		forall_{?e : elevator} [ ~elevator-closed(?e) => [~move-current-dir(?e)] ];
+	};
+}
+
+non-fluents nf_elevators_inst_mdp__1{
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0};
+		floor : {f0,f1,f2}; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.02;
+		ADJACENT-UP(f1,f2) = true;
+		TOP-FLOOR(f2) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__1 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__1;
+	init-state { 
+		elevator-at-floor(e0,f0);
+	};
+	max-nondef-actions = 1;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__2 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0};
+		floor : {f0,f1,f2,f3 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.04905626;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.011420877;
+		ADJACENT-UP(f2,f3) = true;
+		TOP-FLOOR(f3) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__2 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__2;
+	init-state { 
+		elevator-at-floor(e0,f0);
+	};
+	max-nondef-actions = 1;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__3 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0};
+		floor : {f0,f1,f2,f3,f4 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.049540572;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.024929544;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.030339405;
+		ADJACENT-UP(f3,f4) = true;
+		TOP-FLOOR(f4) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__3 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__3;
+	init-state { 
+		elevator-at-floor(e0,f0);
+	};
+	max-nondef-actions = 1;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__4 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1};
+		floor : {f0,f1,f2,f3,f4,f5 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.01250785;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.01081022;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.029569013;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.022388898;
+		ADJACENT-UP(f4,f5) = true;
+		TOP-FLOOR(f5) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__4 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__4;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+	};
+	max-nondef-actions = 2;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__5 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1};
+		floor : {f0,f1,f2,f3,f4,f5,f6 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.014652008;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.04232765;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.036961924;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.020427953;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.04460442;
+		ADJACENT-UP(f5,f6) = true;
+		TOP-FLOOR(f6) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__5 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__5;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+	};
+	max-nondef-actions = 2;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__6 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.037363604;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.049147896;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.04385355;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.03910552;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.035095926;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.045235887;
+		ADJACENT-UP(f6,f7) = true;
+		TOP-FLOOR(f7) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__6 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__6;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+	};
+	max-nondef-actions = 2;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__7 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.036874827;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.04467866;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.044947796;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.022450026;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.02727313;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.04651393;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.021621639;
+		ADJACENT-UP(f7,f8) = true;
+		TOP-FLOOR(f8) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__7 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__7;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+	};
+	max-nondef-actions = 3;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__8 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.049984723;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.04167576;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.027423522;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.027329793;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.014963545;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.03925926;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.03862836;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.028525779;
+		ADJACENT-UP(f8,f9) = true;
+		TOP-FLOOR(f9) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__8 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__8;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+	};
+	max-nondef-actions = 3;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__9 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.033216305;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.031533003;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.042845346;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.03304523;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.047602817;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.039775617;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.04167705;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.025793603;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.046092413;
+		ADJACENT-UP(f9,f10) = true;
+		TOP-FLOOR(f10) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__9 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__9;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+	};
+	max-nondef-actions = 3;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__10 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.03847977;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.012579665;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.02957059;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.017572735;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.010223753;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.02265703;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.04846503;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.040720236;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.025100574;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.021179182;
+		ADJACENT-UP(f10,f11) = true;
+		TOP-FLOOR(f11) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__10 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__10;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+	};
+	max-nondef-actions = 4;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+
+non-fluents nf_elevators_inst_mdp__11 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.030965418;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.04452628;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.019989658;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.027499568;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.027855571;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.011608698;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.03250695;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.040543884;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.028780244;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.03611715;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.04040634;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.01826672;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.015722206;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.013710797;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.039550424;
+		ADJACENT-UP(f15,f16) = true;
+		TOP-FLOOR(f16) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__11 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__11;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+	};
+	max-nondef-actions = 5;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__12 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.013731079;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.015447855;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.02622941;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.016332101;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.020957949;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.013703814;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.036889635;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.02981203;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.010816944;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.013887441;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.017977677;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.037299827;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.022322785;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.044484966;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.024136467;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.019203518;
+		ADJACENT-UP(f16,f17) = true;
+		TOP-FLOOR(f17) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__12 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__12;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+	};
+	max-nondef-actions = 6;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__13 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.012432544;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.03777618;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.017997075;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.014862904;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.02449357;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.017660365;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.04736609;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.02140038;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.012616567;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.014692683;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.014590635;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.032872647;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.017667338;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.018129582;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.015397916;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.010999313;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.018373698;
+		ADJACENT-UP(f17,f18) = true;
+		TOP-FLOOR(f18) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__13 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__13;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+	};
+	max-nondef-actions = 6;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__14 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.015708243;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.029878518;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.032108415;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.037964452;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.035247568;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.04939343;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.042311467;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.02773374;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.011084254;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.04620496;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.04051254;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.023367848;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.028491324;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.012696221;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.036706995;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.010603542;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.042477764;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.014148595;
+		ADJACENT-UP(f18,f19) = true;
+		TOP-FLOOR(f19) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__14 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__14;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+	};
+	max-nondef-actions = 6;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__15 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5,e6};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.024877232;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.02310108;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.046872705;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.048780702;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.012925122;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.012976155;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.02201549;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.010748842;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.04552029;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.04249379;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.025879785;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.017997188;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.045614906;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.047962755;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.041350886;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.020683479;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.016864078;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.044490583;
+		ADJACENT-UP(f18,f19) = true;
+		ARRIVE-PARAM(f19) = 0.022538478;
+		ADJACENT-UP(f19,f20) = true;
+		TOP-FLOOR(f20) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__15 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__15;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+		elevator-at-floor(e6,f0);
+	};
+	max-nondef-actions = 7;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__16 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5,e6};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20,f21 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.02397446;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.031816103;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.01807395;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.047582038;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.046708226;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.040035255;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.029197928;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.032186594;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.01708991;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.03140919;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.02039448;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.039103672;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.036523584;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.025315955;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.01774798;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.012470505;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.04069162;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.018926265;
+		ADJACENT-UP(f18,f19) = true;
+		ARRIVE-PARAM(f19) = 0.036344275;
+		ADJACENT-UP(f19,f20) = true;
+		ARRIVE-PARAM(f20) = 0.032695428;
+		ADJACENT-UP(f20,f21) = true;
+		TOP-FLOOR(f21) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__16 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__16;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+		elevator-at-floor(e6,f0);
+	};
+	max-nondef-actions = 7;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__17 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20,f21 ,f22,f23,f24,f25,f26,f27,f28,f29,f30,f31,f32}; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.02397446;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.031816103;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.01807395;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.047582038;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.046708226;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.040035255;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.029197928;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.032186594;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.01708991;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.03140919;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.02039448;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.039103672;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.036523584;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.025315955;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.01774798;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.012470505;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.04069162;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.018926265;
+		ADJACENT-UP(f18,f19) = true;
+		ARRIVE-PARAM(f19) = 0.036344275;
+		ADJACENT-UP(f19,f20) = true;
+		ARRIVE-PARAM(f20) = 0.032695428;
+		ADJACENT-UP(f21,f22) = true;
+		ARRIVE-PARAM(f22) = 0.032695428;
+		ADJACENT-UP(f22,f23) = true;
+		ARRIVE-PARAM(f23) = 0.032695428;
+		ADJACENT-UP(f23,f24) = true;
+		ARRIVE-PARAM(f24) = 0.032695428;
+ADJACENT-UP(f24,f25) = true;
+		ARRIVE-PARAM(f25) = 0.032695428;
+ADJACENT-UP(f25,f26) = true;
+		ARRIVE-PARAM(f26) = 0.032695428;
+ADJACENT-UP(f26,f27) = true;
+		ARRIVE-PARAM(f27) = 0.032695428;
+ADJACENT-UP(f27,f28) = true;
+		ARRIVE-PARAM(f28) = 0.032695428;
+ADJACENT-UP(f28,f29) = true;
+		ARRIVE-PARAM(f29) = 0.032695428;
+ADJACENT-UP(f29,f30) = true;
+		ARRIVE-PARAM(f30) = 0.032695428;
+ADJACENT-UP(f30,f31) = true;
+		ARRIVE-PARAM(f31) = 0.032695428;
+ADJACENT-UP(f31,f32) = true;
+		ARRIVE-PARAM(f32) = 0.032695428;
+
+
+		TOP-FLOOR(f32) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__17 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__17;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+		elevator-at-floor(e6,f0);
+elevator-at-floor(e7,f0);
+		elevator-at-floor(e8,f0);
+		elevator-at-floor(e9,f0);
+		elevator-at-floor(e10,f0);
+	};
+	max-nondef-actions = 11;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__18 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20,f21 ,f22,f23,f24,f25,f26,f27,f28,f29,f30,f31,f32,f33,f34,f35}; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.02397446;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.031816103;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.01807395;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.047582038;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.046708226;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.040035255;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.029197928;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.032186594;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.01708991;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.03140919;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.02039448;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.039103672;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.036523584;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.025315955;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.01774798;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.012470505;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.04069162;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.018926265;
+		ADJACENT-UP(f18,f19) = true;
+		ARRIVE-PARAM(f19) = 0.036344275;
+		ADJACENT-UP(f19,f20) = true;
+		ARRIVE-PARAM(f20) = 0.032695428;
+		ADJACENT-UP(f21,f22) = true;
+		ARRIVE-PARAM(f22) = 0.032695428;
+		ADJACENT-UP(f22,f23) = true;
+		ARRIVE-PARAM(f23) = 0.032695428;
+		ADJACENT-UP(f23,f24) = true;
+		ARRIVE-PARAM(f24) = 0.032695428;
+ADJACENT-UP(f24,f25) = true;
+		ARRIVE-PARAM(f25) = 0.032695428;
+ADJACENT-UP(f25,f26) = true;
+		ARRIVE-PARAM(f26) = 0.032695428;
+ADJACENT-UP(f26,f27) = true;
+		ARRIVE-PARAM(f27) = 0.032695428;
+ADJACENT-UP(f27,f28) = true;
+		ARRIVE-PARAM(f28) = 0.032695428;
+ADJACENT-UP(f28,f29) = true;
+		ARRIVE-PARAM(f29) = 0.032695428;
+ADJACENT-UP(f29,f30) = true;
+		ARRIVE-PARAM(f30) = 0.032695428;
+ADJACENT-UP(f30,f31) = true;
+		ARRIVE-PARAM(f31) = 0.032695428;
+ADJACENT-UP(f31,f32) = true;
+		ARRIVE-PARAM(f32) = 0.032695428;
+ADJACENT-UP(f32,f33) = true;
+		ARRIVE-PARAM(f33) = 0.032695428;
+ADJACENT-UP(f33,f34) = true;
+		ARRIVE-PARAM(f34) = 0.032695428;
+ADJACENT-UP(f34,f35) = true;
+		ARRIVE-PARAM(f35) = 0.032695428;
+
+
+		TOP-FLOOR(f35) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__18 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__18;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+		elevator-at-floor(e6,f0);
+elevator-at-floor(e7,f0);
+		elevator-at-floor(e8,f0);
+		elevator-at-floor(e9,f0);
+		elevator-at-floor(e10,f0);
+elevator-at-floor(e11,f0);
+	};
+	max-nondef-actions = 12;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__19 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20,f21 ,f22,f23,f24,f25,f26,f27,f28,f29,f30,f31,f32,f33,f34,f35,f36,f37,f38}; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.02397446;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.031816103;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.01807395;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.047582038;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.046708226;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.040035255;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.029197928;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.032186594;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.01708991;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.03140919;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.02039448;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.039103672;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.036523584;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.025315955;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.01774798;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.012470505;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.04069162;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.018926265;
+		ADJACENT-UP(f18,f19) = true;
+		ARRIVE-PARAM(f19) = 0.036344275;
+		ADJACENT-UP(f19,f20) = true;
+		ARRIVE-PARAM(f20) = 0.032695428;
+		ADJACENT-UP(f21,f22) = true;
+		ARRIVE-PARAM(f22) = 0.032695428;
+		ADJACENT-UP(f22,f23) = true;
+		ARRIVE-PARAM(f23) = 0.032695428;
+		ADJACENT-UP(f23,f24) = true;
+		ARRIVE-PARAM(f24) = 0.032695428;
+ADJACENT-UP(f24,f25) = true;
+		ARRIVE-PARAM(f25) = 0.032695428;
+ADJACENT-UP(f25,f26) = true;
+		ARRIVE-PARAM(f26) = 0.032695428;
+ADJACENT-UP(f26,f27) = true;
+		ARRIVE-PARAM(f27) = 0.032695428;
+ADJACENT-UP(f27,f28) = true;
+		ARRIVE-PARAM(f28) = 0.032695428;
+ADJACENT-UP(f28,f29) = true;
+		ARRIVE-PARAM(f29) = 0.032695428;
+ADJACENT-UP(f29,f30) = true;
+		ARRIVE-PARAM(f30) = 0.032695428;
+ADJACENT-UP(f30,f31) = true;
+		ARRIVE-PARAM(f31) = 0.032695428;
+ADJACENT-UP(f31,f32) = true;
+		ARRIVE-PARAM(f32) = 0.032695428;
+ADJACENT-UP(f32,f33) = true;
+		ARRIVE-PARAM(f33) = 0.032695428;
+ADJACENT-UP(f33,f34) = true;
+		ARRIVE-PARAM(f34) = 0.032695428;
+ADJACENT-UP(f34,f35) = true;
+		ARRIVE-PARAM(f35) = 0.032695428;
+ADJACENT-UP(f35,f36) = true;
+		ARRIVE-PARAM(f36) = 0.032695428;
+ADJACENT-UP(f36,f37) = true;
+		ARRIVE-PARAM(f37) = 0.032695428;
+ADJACENT-UP(f37,f38) = true;
+		ARRIVE-PARAM(f38) = 0.032695428;
+
+
+		TOP-FLOOR(f38) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__19 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__19;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+		elevator-at-floor(e6,f0);
+elevator-at-floor(e7,f0);
+		elevator-at-floor(e8,f0);
+		elevator-at-floor(e9,f0);
+		elevator-at-floor(e10,f0);
+elevator-at-floor(e11,f0);
+elevator-at-floor(e12,f0);
+
+	};
+	max-nondef-actions = 13;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+non-fluents nf_elevators_inst_mdp__20 {
+	domain = elevators_mdp; 
+	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10,e11,e12,e13};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20,f21 ,f22,f23,f24,f25,f26,f27,f28,f29,f30,f31,f32,f33,f34,f35,f36,f37,f38,f39,f40,f41}; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.02397446;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.031816103;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.01807395;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.047582038;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.046708226;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.040035255;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.029197928;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.032186594;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.01708991;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.03140919;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.02039448;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.039103672;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.036523584;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.025315955;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.01774798;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.012470505;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.04069162;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.018926265;
+		ADJACENT-UP(f18,f19) = true;
+		ARRIVE-PARAM(f19) = 0.036344275;
+		ADJACENT-UP(f19,f20) = true;
+		ARRIVE-PARAM(f20) = 0.032695428;
+		ADJACENT-UP(f21,f22) = true;
+		ARRIVE-PARAM(f22) = 0.032695428;
+		ADJACENT-UP(f22,f23) = true;
+		ARRIVE-PARAM(f23) = 0.032695428;
+		ADJACENT-UP(f23,f24) = true;
+		ARRIVE-PARAM(f24) = 0.032695428;
+ADJACENT-UP(f24,f25) = true;
+		ARRIVE-PARAM(f25) = 0.032695428;
+ADJACENT-UP(f25,f26) = true;
+		ARRIVE-PARAM(f26) = 0.032695428;
+ADJACENT-UP(f26,f27) = true;
+		ARRIVE-PARAM(f27) = 0.032695428;
+ADJACENT-UP(f27,f28) = true;
+		ARRIVE-PARAM(f28) = 0.032695428;
+ADJACENT-UP(f28,f29) = true;
+		ARRIVE-PARAM(f29) = 0.032695428;
+ADJACENT-UP(f29,f30) = true;
+		ARRIVE-PARAM(f30) = 0.032695428;
+ADJACENT-UP(f30,f31) = true;
+		ARRIVE-PARAM(f31) = 0.032695428;
+ADJACENT-UP(f31,f32) = true;
+		ARRIVE-PARAM(f32) = 0.032695428;
+ADJACENT-UP(f32,f33) = true;
+		ARRIVE-PARAM(f33) = 0.032695428;
+ADJACENT-UP(f33,f34) = true;
+		ARRIVE-PARAM(f34) = 0.032695428;
+ADJACENT-UP(f34,f35) = true;
+		ARRIVE-PARAM(f35) = 0.032695428;
+ADJACENT-UP(f35,f36) = true;
+		ARRIVE-PARAM(f36) = 0.032695428;
+ADJACENT-UP(f36,f37) = true;
+		ARRIVE-PARAM(f37) = 0.032695428;
+ADJACENT-UP(f37,f38) = true;
+		ARRIVE-PARAM(f38) = 0.032695428;
+ADJACENT-UP(f38,f39) = true;
+		ARRIVE-PARAM(f39) = 0.032695428;
+ADJACENT-UP(f39,f40) = true;
+		ARRIVE-PARAM(f40) = 0.032695428;
+ADJACENT-UP(f40,f41) = true;
+		ARRIVE-PARAM(f41) = 0.032695428;
+
+
+		TOP-FLOOR(f41) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+ }
+instance elevators_inst_mdp__20 { 
+	domain = elevators_mdp; 
+ 	non-fluents = nf_elevators_inst_mdp__20;
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+		elevator-at-floor(e6,f0);
+elevator-at-floor(e7,f0);
+		elevator-at-floor(e8,f0);
+		elevator-at-floor(e9,f0);
+		elevator-at-floor(e10,f0);
+elevator-at-floor(e11,f0);
+elevator-at-floor(e12,f0);
+elevator-at-floor(e13,f0);
+	};
+	max-nondef-actions = 14;
+	horizon = 30;
+	discount = 1.0;
+} 
+
+

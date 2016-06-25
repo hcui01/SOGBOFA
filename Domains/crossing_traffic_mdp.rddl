@@ -1,0 +1,1726 @@
+////////////////////////////////////////////////////////////////////
+//
+// Crossing Traffic Robot Navigation
+//
+// Author: Sungwook Yoon (sungwook.yoon [at] gmail.com)
+//
+// Modified for competition and translation purposes by Scott Sanner.
+//
+// In a grid, a robot (R) must get to a goal (G) and avoid obstacles (O)
+// arriving randomly and moving left.  If an obstacle overlaps with the
+// robot, the robot disappears and can no longer move around.  The robot
+// can "duck" underneath a car by deliberately moving right/east when
+// a car is to the right of it (this can make the solution interesting...
+// the robot should start at the left side of the screen then).  The robot
+// receives -1 for every time step it has not reached the goal.  The goal
+// state is absorbing with 0 reward.
+//
+// ****************
+// *            R * 
+// *  <-O <-O <-O *
+// *    <-O   <-O *
+// * <-O    <-O   *
+// *     <-O  <-O *
+// *            G *
+// ****************
+//
+// You can think of this as the RDDL version of Frogger:
+//
+//   http://en.wikipedia.org/wiki/Frogger
+//
+////////////////////////////////////////////////////////////////////
+
+domain crossing_traffic_mdp {
+	requirements = {
+//		constrained-state,
+		reward-deterministic
+	};
+	
+	types {
+		xpos : object;
+		ypos : object;
+	};
+	
+	pvariables {
+
+		NORTH(ypos, ypos) : {non-fluent, bool, default = false};
+		SOUTH(ypos, ypos) : {non-fluent, bool, default = false};
+		EAST(xpos, xpos)  : {non-fluent, bool, default = false};
+		WEST(xpos, xpos)  : {non-fluent, bool, default = false};
+
+		MIN-XPOS(xpos) : {non-fluent, bool, default = false};
+		MAX-XPOS(xpos) : {non-fluent, bool, default = false};
+		MIN-YPOS(ypos) : {non-fluent, bool, default = false};
+		MAX-YPOS(ypos) : {non-fluent, bool, default = false};
+	
+		INPUT-RATE : {non-fluent, real, default = 0.2};
+		
+		GOAL(xpos,ypos) : {non-fluent, bool, default = false};
+		
+		// Fluents
+		robot-at(xpos, ypos)    : {state-fluent, bool, default = false};
+		obstacle-at(xpos, ypos) : {state-fluent, bool, default = false};
+		
+		// Actions
+		move-north : {action-fluent, bool, default = false};
+		move-south : {action-fluent, bool, default = false};
+		move-east  : {action-fluent, bool, default = false};
+		move-west  : {action-fluent, bool, default = false};
+	};
+	
+	cpfs {
+	
+		robot-at'(?x,?y) =
+		
+			// Goal is absorbing so robot stays put 
+			if ( GOAL(?x,?y) ^ robot-at(?x,?y)  )
+			then 
+				KronDelta(true)
+			else if ( exists_{?x2 : xpos, ?y2 : ypos} [ GOAL(?x2,?y2) ^ robot-at(?x2,?y2)  ] )
+			then 
+				KronDelta(false) // because of fall-through we know (?x,y) != (?x2,?y2)
+				
+			// Check for legal robot movement (robot disappears if at an obstacle)
+			else if ( move-north ^ exists_{?y2 : ypos} [ NORTH(?y2,?y) ^ robot-at(?x,?y2) ^ ~obstacle-at(?x,?y2) ] )
+			then 
+				KronDelta(true) // robot moves to this location
+			else if ( move-north ^ exists_{?y2 : ypos} [ NORTH(?y,?y2) ^ robot-at(?x,?y) ] )
+			then 
+				KronDelta(false) // robot leaves this location
+			else if ( move-south ^ exists_{?y2 : ypos} [ SOUTH(?y2,?y) ^ robot-at(?x,?y2) ^ ~obstacle-at(?x,?y2) ] )
+			then 
+				KronDelta(true) // robot moves to this location
+			else if ( move-south ^ exists_{?y2 : ypos} [ SOUTH(?y,?y2) ^ robot-at(?x,?y) ] )
+			then 
+				KronDelta(false) // robot leaves this location
+			else if ( move-east ^ exists_{?x2 : xpos} [ EAST(?x2,?x) ^ robot-at(?x2,?y) ^ ~obstacle-at(?x2,?y) ] )
+			then 
+				KronDelta(true) // robot moves to this location
+			else if ( move-east ^ exists_{?x2 : xpos} [ EAST(?x,?x2) ^ robot-at(?x,?y) ] )
+			then 
+				KronDelta(false) // robot leaves this location
+			else if ( move-west ^ exists_{?x2 : xpos} [ WEST(?x2,?x) ^ robot-at(?x2,?y) ^ ~obstacle-at(?x2,?y) ] )
+			then 
+				KronDelta(true) // robot moves to this location
+			else if ( move-west ^ exists_{?x2 : xpos} [ WEST(?x,?x2) ^ robot-at(?x,?y) ] )
+			then 
+				KronDelta(false) // robot leaves this location
+				
+			// A noop or illegal movement, so state unchanged
+			else 
+				KronDelta( robot-at(?x,?y) ^ ~obstacle-at(?x,?y) );
+			
+		obstacle-at'(?x, ?y) =
+		
+			// No obstacles in top or bottom row (these rows are safe havens)
+			if ( MIN-YPOS(?y) | MAX-YPOS(?y) )
+				then KronDelta( false )
+		
+			// Check for RHS border input cell
+			else if ( MAX-XPOS(?x) )
+				then Bernoulli(	INPUT-RATE )
+			
+			// Not a top or bottom row and not a border input cell -- inherits obstacle to east
+			else
+				KronDelta( exists_{?x2 : xpos} [EAST(?x,?x2) ^ obstacle-at(?x2,?y)] );
+				
+	};
+	
+	// 0 reward for reaching goal, -1 in all other cases
+	reward = [sum_{?x : xpos, ?y : ypos} -(GOAL(?x,?y) ^ ~robot-at(?x,?y))]; 
+	
+//	state-action-constraints {
+//	
+//		// Robot at exactly one position
+//		[sum_{?x : xpos, ?y : ypos} robot-at(?x,?y)] <= 1;
+//		
+//		// EAST, WEST, NORTH, SOUTH defined properly (unique and symmetric)
+//		forall_{?x1 : xpos} [(sum_{?x2 : xpos} WEST(?x1,?x2)) <= 1];
+//		forall_{?x1 : xpos} [(sum_{?x2 : xpos} EAST(?x1,?x2)) <= 1];
+//		forall_{?y1 : ypos} [(sum_{?y2 : ypos} NORTH(?y1,?y2)) <= 1];
+//		forall_{?y1 : ypos} [(sum_{?y2 : ypos} SOUTH(?y1,?y2)) <= 1];
+//		forall_{?x1 : xpos, ?x2 : xpos} [ EAST(?x1,?x2) <=> WEST(?x2,?x1) ];
+//		forall_{?y1 : ypos, ?y2 : ypos} [ SOUTH(?y1,?y2) <=> NORTH(?y2,?y1) ];
+//
+//		// Definition verification
+//		[ sum_{?x : xpos} MIN-XPOS(?x) ] == 1;
+//		[ sum_{?x : xpos} MAX-XPOS(?x) ] == 1;
+//		[ sum_{?y : ypos} MIN-YPOS(?y) ] == 1;
+//		[ sum_{?y : ypos} MAX-YPOS(?y) ] == 1;
+//		[ sum_{?x : xpos, ?y : ypos} GOAL(?x,?y) ] == 1;
+//		
+//	};
+	
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__1 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3};
+		ypos : {y1,y2,y3};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x3);
+		MIN-YPOS(y1);
+		MAX-YPOS(y3);
+
+		GOAL(x3,y3);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__1 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__1;
+	init-state {
+		robot-at(x3,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x3,y2);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__2 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3};
+		ypos : {y1,y2,y3};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x3);
+		MIN-YPOS(y1);
+		MAX-YPOS(y3);
+
+		GOAL(x3,y3);
+
+		INPUT-RATE = 0.6;
+	};
+}
+
+instance crossing_traffic_inst_mdp__2 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__2;
+	init-state {
+		robot-at(x3,y1);
+		obstacle-at(x2,y2);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__3 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4};
+		ypos : {y1,y2,y3,y4};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x4);
+		MIN-YPOS(y1);
+		MAX-YPOS(y4);
+
+		GOAL(x4,y4);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__3 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__3;
+	init-state {
+		robot-at(x4,y1);
+		obstacle-at(x1,y3);
+		obstacle-at(x2,y3);
+		obstacle-at(x3,y3);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__4 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4};
+		ypos : {y1,y2,y3,y4};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x4);
+		MIN-YPOS(y1);
+		MAX-YPOS(y4);
+
+		GOAL(x4,y4);
+
+		INPUT-RATE = 0.6;
+	};
+}
+
+instance crossing_traffic_inst_mdp__4 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__4;
+	init-state {
+		robot-at(x4,y1);
+		obstacle-at(x2,y3);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y3);
+		obstacle-at(x4,y2);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__5 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5};
+		ypos : {y1,y2,y3,y4,y5};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x5);
+		MIN-YPOS(y1);
+		MAX-YPOS(y5);
+
+		GOAL(x5,y5);
+
+		INPUT-RATE = 0.2;
+	};
+}
+
+instance crossing_traffic_inst_mdp__5 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__5;
+	init-state {
+		robot-at(x5,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x1,y4);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y3);
+		obstacle-at(x3,y3);
+		obstacle-at(x4,y3);
+		obstacle-at(x5,y2);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__6 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5};
+		ypos : {y1,y2,y3,y4,y5};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x5);
+		MIN-YPOS(y1);
+		MAX-YPOS(y5);
+
+		GOAL(x5,y5);
+
+		INPUT-RATE = 0.4;
+	};
+}
+
+instance crossing_traffic_inst_mdp__6 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__6;
+	init-state {
+		robot-at(x5,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y3);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y4);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y3);
+		obstacle-at(x5,y4);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__7 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6};
+		ypos : {y1,y2,y3,y4,y5,y6};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x6);
+		MIN-YPOS(y1);
+		MAX-YPOS(y6);
+
+		GOAL(x6,y6);
+
+		INPUT-RATE = 0.2;
+	};
+}
+
+instance crossing_traffic_inst_mdp__7 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__7;
+	init-state {
+		robot-at(x6,y1);
+		obstacle-at(x1,y4);
+		obstacle-at(x1,y5);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y3);
+		obstacle-at(x2,y4);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y5);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y3);
+		obstacle-at(x4,y4);
+		obstacle-at(x4,y5);
+		obstacle-at(x5,y5);
+		obstacle-at(x6,y5);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+
+non-fluents nf_crossing_traffic_inst_mdp__8 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6};
+		ypos : {y1,y2,y3,y4,y5,y6};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x6);
+		MIN-YPOS(y1);
+		MAX-YPOS(y6);
+
+		GOAL(x6,y6);
+
+		INPUT-RATE = 0.4;
+	};
+}
+
+instance crossing_traffic_inst_mdp__8 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__8;
+	init-state {
+		robot-at(x6,y1);
+		obstacle-at(x1,y4);
+		obstacle-at(x1,y5);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y3);
+		obstacle-at(x2,y4);
+		obstacle-at(x2,y5);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y3);
+		obstacle-at(x3,y4);
+		obstacle-at(x4,y2);
+		obstacle-at(x5,y2);
+		obstacle-at(x6,y2);
+		obstacle-at(x6,y4);
+		obstacle-at(x6,y5);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__9 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7};
+		ypos : {y1,y2,y3,y4,y5,y6,y7};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x7);
+		MIN-YPOS(y1);
+		MAX-YPOS(y7);
+
+		GOAL(x7,y7);
+
+		INPUT-RATE = 0.1;
+	};
+}
+
+instance crossing_traffic_inst_mdp__9 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__9;
+	init-state {
+		robot-at(x7,y1);
+		obstacle-at(x1,y3);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y3);
+		obstacle-at(x2,y4);
+		obstacle-at(x2,y5);
+		obstacle-at(x2,y6);
+		obstacle-at(x3,y3);
+		obstacle-at(x3,y5);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y4);
+		obstacle-at(x5,y5);
+		obstacle-at(x6,y2);
+		obstacle-at(x6,y4);
+		obstacle-at(x6,y5);
+		obstacle-at(x6,y6);
+		obstacle-at(x7,y2);
+		obstacle-at(x7,y3);
+		obstacle-at(x7,y6);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__10 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7};
+		ypos : {y1,y2,y3,y4,y5,y6,y7};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x7);
+		MIN-YPOS(y1);
+		MAX-YPOS(y7);
+
+		GOAL(x7,y7);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__10 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__10;
+	init-state {
+		robot-at(x7,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x1,y4);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y3);
+		obstacle-at(x2,y4);
+		obstacle-at(x2,y5);
+		obstacle-at(x2,y6);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y3);
+		obstacle-at(x3,y5);
+		obstacle-at(x5,y3);
+		obstacle-at(x5,y6);
+		obstacle-at(x6,y4);
+		obstacle-at(x6,y5);
+		obstacle-at(x7,y2);
+		obstacle-at(x7,y5);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+non-fluents nf_crossing_traffic_inst_mdp__11 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7};
+		ypos : {y1,y2,y3,y4,y5,y6,y7};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x7);
+		MIN-YPOS(y1);
+		MAX-YPOS(y7);
+
+		GOAL(x7,y7);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__11 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__11;
+	init-state {
+		robot-at(x7,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x1,y3);
+		obstacle-at(x1,y4);
+		obstacle-at(x1,y5);
+		obstacle-at(x1,y6);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y3);
+		obstacle-at(x3,y4);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y6);
+		obstacle-at(x5,y2);
+		obstacle-at(x5,y4);
+		obstacle-at(x5,y6);
+		obstacle-at(x6,y2);
+		obstacle-at(x6,y3);
+		obstacle-at(x7,y2);
+		obstacle-at(x7,y3);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__12 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7};
+		ypos : {y1,y2,y3,y4,y5,y6,y7,y8};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+		NORTH(y7,y8);
+		SOUTH(y8,y7);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x7);
+		MIN-YPOS(y1);
+		MAX-YPOS(y8);
+
+		GOAL(x7,y8);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__12 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__12;
+	init-state {
+		robot-at(x7,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x1,y4);
+		obstacle-at(x1,y6);
+		obstacle-at(x1,y7);
+		obstacle-at(x2,y4);
+		obstacle-at(x2,y5);
+		obstacle-at(x3,y4);
+		obstacle-at(x3,y5);
+		obstacle-at(x4,y3);
+		obstacle-at(x4,y6);
+		obstacle-at(x5,y2);
+		obstacle-at(x5,y4);
+		obstacle-at(x5,y5);
+		obstacle-at(x5,y7);
+		obstacle-at(x6,y2);
+		obstacle-at(x6,y4);
+		obstacle-at(x6,y6);
+		obstacle-at(x6,y7);
+		obstacle-at(x7,y2);
+		obstacle-at(x7,y3);
+		obstacle-at(x7,y4);
+		obstacle-at(x7,y6);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__13 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7,x8};
+		ypos : {y1,y2,y3,y4,y5,y6,y7,y8};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+		NORTH(y7,y8);
+		SOUTH(y8,y7);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+		EAST(x7,x8);
+		WEST(x8,x7);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x8);
+		MIN-YPOS(y1);
+		MAX-YPOS(y8);
+
+		GOAL(x8,y8);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__13 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__13;
+	init-state {
+		robot-at(x8,y1);
+		obstacle-at(x1,y6);
+		obstacle-at(x1,y7);
+		obstacle-at(x2,y3);
+		obstacle-at(x2,y5);
+		obstacle-at(x2,y6);
+		obstacle-at(x2,y7);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y5);
+		obstacle-at(x3,y6);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y4);
+		obstacle-at(x5,y2);
+		obstacle-at(x5,y3);
+		obstacle-at(x5,y6);
+		obstacle-at(x5,y7);
+		obstacle-at(x6,y6);
+		obstacle-at(x6,y7);
+		obstacle-at(x7,y3);
+		obstacle-at(x7,y4);
+		obstacle-at(x7,y6);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__14 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7,x8};
+		ypos : {y1,y2,y3,y4,y5,y6,y7,y8,y9};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+		NORTH(y7,y8);
+		SOUTH(y8,y7);
+		NORTH(y8,y9);
+		SOUTH(y9,y8);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+		EAST(x7,x8);
+		WEST(x8,x7);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x8);
+		MIN-YPOS(y1);
+		MAX-YPOS(y9);
+
+		GOAL(x8,y9);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__14 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__14;
+	init-state {
+		robot-at(x8,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x1,y3);
+		obstacle-at(x1,y6);
+		obstacle-at(x1,y7);
+		obstacle-at(x2,y3);
+		obstacle-at(x2,y7);
+		obstacle-at(x2,y8);
+		obstacle-at(x3,y3);
+		obstacle-at(x3,y4);
+		obstacle-at(x3,y6);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y3);
+		obstacle-at(x4,y5);
+		obstacle-at(x4,y6);
+		obstacle-at(x4,y7);
+		obstacle-at(x5,y3);
+		obstacle-at(x6,y4);
+		obstacle-at(x6,y5);
+		obstacle-at(x6,y6);
+		obstacle-at(x6,y7);
+		obstacle-at(x7,y2);
+		obstacle-at(x7,y3);
+		obstacle-at(x7,y4);
+		obstacle-at(x7,y6);
+		obstacle-at(x7,y8);
+		obstacle-at(x8,y6);
+		obstacle-at(x8,y8);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__15 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7,x8,x9};
+		ypos : {y1,y2,y3,y4,y5,y6,y7,y8,y9};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+		NORTH(y7,y8);
+		SOUTH(y8,y7);
+		NORTH(y8,y9);
+		SOUTH(y9,y8);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+		EAST(x7,x8);
+		WEST(x8,x7);
+		EAST(x8,x9);
+		WEST(x9,x8);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x9);
+		MIN-YPOS(y1);
+		MAX-YPOS(y9);
+
+		GOAL(x9,y9);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__15 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__15;
+	init-state {
+		robot-at(x9,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x1,y3);
+		obstacle-at(x1,y6);
+		obstacle-at(x2,y3);
+		obstacle-at(x2,y6);
+		obstacle-at(x2,y7);
+		obstacle-at(x2,y8);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y4);
+		obstacle-at(x3,y5);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y4);
+		obstacle-at(x4,y5);
+		obstacle-at(x4,y8);
+		obstacle-at(x5,y2);
+		obstacle-at(x5,y5);
+		obstacle-at(x5,y6);
+		obstacle-at(x5,y8);
+		obstacle-at(x6,y3);
+		obstacle-at(x6,y6);
+		obstacle-at(x7,y3);
+		obstacle-at(x7,y5);
+		obstacle-at(x7,y8);
+		obstacle-at(x8,y2);
+		obstacle-at(x8,y5);
+		obstacle-at(x8,y6);
+		obstacle-at(x9,y2);
+		obstacle-at(x9,y3);
+		obstacle-at(x9,y4);
+		obstacle-at(x9,y5);
+		obstacle-at(x9,y6);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__16 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7,x8,x9};
+		ypos : {y1,y2,y3,y4,y5,y6,y7,y8,y9,y10};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+		NORTH(y7,y8);
+		SOUTH(y8,y7);
+		NORTH(y8,y9);
+		SOUTH(y9,y8);
+		NORTH(y9,y10);
+		SOUTH(y10,y9);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+		EAST(x7,x8);
+		WEST(x8,x7);
+		EAST(x8,x9);
+		WEST(x9,x8);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x9);
+		MIN-YPOS(y1);
+		MAX-YPOS(y10);
+
+		GOAL(x9,y10);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__16 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__16;
+	init-state {
+		robot-at(x9,y1);
+		obstacle-at(x1,y4);
+		obstacle-at(x1,y6);
+		obstacle-at(x1,y7);
+		obstacle-at(x1,y8);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y5);
+		obstacle-at(x2,y6);
+		obstacle-at(x2,y8);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y4);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y3);
+		obstacle-at(x4,y5);
+		obstacle-at(x4,y6);
+		obstacle-at(x4,y7);
+		obstacle-at(x4,y9);
+		obstacle-at(x5,y3);
+		obstacle-at(x5,y4);
+		obstacle-at(x5,y8);
+		obstacle-at(x6,y2);
+		obstacle-at(x6,y3);
+		obstacle-at(x6,y6);
+		obstacle-at(x6,y9);
+		obstacle-at(x7,y3);
+		obstacle-at(x7,y4);
+		obstacle-at(x7,y5);
+		obstacle-at(x7,y7);
+		obstacle-at(x7,y9);
+		obstacle-at(x8,y5);
+		obstacle-at(x9,y6);
+		obstacle-at(x9,y7);
+		obstacle-at(x9,y9);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__17 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7,x8,x9,x10};
+		ypos : {y1,y2,y3,y4,y5,y6,y7,y8,y9,y10};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+		NORTH(y7,y8);
+		SOUTH(y8,y7);
+		NORTH(y8,y9);
+		SOUTH(y9,y8);
+		NORTH(y9,y10);
+		SOUTH(y10,y9);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+		EAST(x7,x8);
+		WEST(x8,x7);
+		EAST(x8,x9);
+		WEST(x9,x8);
+		EAST(x9,x10);
+		WEST(x10,x9);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x10);
+		MIN-YPOS(y1);
+		MAX-YPOS(y10);
+
+		GOAL(x10,y10);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__17 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__17;
+	init-state {
+		robot-at(x10,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x1,y3);
+		obstacle-at(x1,y4);
+		obstacle-at(x1,y6);
+		obstacle-at(x1,y7);
+		obstacle-at(x1,y8);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y4);
+		obstacle-at(x2,y6);
+		obstacle-at(x2,y8);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y3);
+		obstacle-at(x3,y9);
+		obstacle-at(x4,y3);
+		obstacle-at(x4,y4);
+		obstacle-at(x4,y5);
+		obstacle-at(x4,y6);
+		obstacle-at(x4,y8);
+		obstacle-at(x4,y9);
+		obstacle-at(x5,y2);
+		obstacle-at(x5,y4);
+		obstacle-at(x5,y5);
+		obstacle-at(x5,y7);
+		obstacle-at(x6,y2);
+		obstacle-at(x6,y5);
+		obstacle-at(x6,y6);
+		obstacle-at(x6,y9);
+		obstacle-at(x7,y3);
+		obstacle-at(x7,y5);
+		obstacle-at(x8,y4);
+		obstacle-at(x8,y7);
+		obstacle-at(x8,y8);
+		obstacle-at(x9,y3);
+		obstacle-at(x9,y5);
+		obstacle-at(x9,y6);
+		obstacle-at(x9,y9);
+		obstacle-at(x10,y2);
+		obstacle-at(x10,y4);
+		obstacle-at(x10,y6);
+		obstacle-at(x10,y7);
+		obstacle-at(x10,y8);
+		obstacle-at(x10,y9);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__18 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11};
+		ypos : {y1,y2,y3,y4,y5,y6,y7,y8,y9,y10};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+		NORTH(y7,y8);
+		SOUTH(y8,y7);
+		NORTH(y8,y9);
+		SOUTH(y9,y8);
+		NORTH(y9,y10);
+		SOUTH(y10,y9);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+		EAST(x7,x8);
+		WEST(x8,x7);
+		EAST(x8,x9);
+		WEST(x9,x8);
+		EAST(x9,x10);
+		WEST(x10,x9);
+		EAST(x10,x11);
+		WEST(x11,x10);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x11);
+		MIN-YPOS(y1);
+		MAX-YPOS(y10);
+
+		GOAL(x11,y10);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__18 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__18;
+	init-state {
+		robot-at(x11,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x1,y3);
+		obstacle-at(x1,y4);
+		obstacle-at(x1,y5);
+		obstacle-at(x1,y6);
+		obstacle-at(x1,y7);
+		obstacle-at(x1,y8);
+		obstacle-at(x2,y2);
+		obstacle-at(x2,y5);
+		obstacle-at(x2,y7);
+		obstacle-at(x2,y8);
+		obstacle-at(x2,y9);
+		obstacle-at(x3,y2);
+		obstacle-at(x3,y3);
+		obstacle-at(x3,y4);
+		obstacle-at(x3,y6);
+		obstacle-at(x3,y7);
+		obstacle-at(x3,y8);
+		obstacle-at(x3,y9);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y3);
+		obstacle-at(x4,y7);
+		obstacle-at(x4,y9);
+		obstacle-at(x5,y2);
+		obstacle-at(x5,y3);
+		obstacle-at(x5,y4);
+		obstacle-at(x5,y5);
+		obstacle-at(x5,y6);
+		obstacle-at(x5,y7);
+		obstacle-at(x5,y8);
+		obstacle-at(x5,y9);
+		obstacle-at(x6,y3);
+		obstacle-at(x6,y4);
+		obstacle-at(x6,y5);
+		obstacle-at(x6,y7);
+		obstacle-at(x6,y9);
+		obstacle-at(x7,y2);
+		obstacle-at(x7,y4);
+		obstacle-at(x7,y6);
+		obstacle-at(x7,y8);
+		obstacle-at(x8,y7);
+		obstacle-at(x8,y9);
+		obstacle-at(x9,y2);
+		obstacle-at(x9,y3);
+		obstacle-at(x9,y4);
+		obstacle-at(x9,y5);
+		obstacle-at(x9,y6);
+		obstacle-at(x9,y7);
+		obstacle-at(x9,y9);
+		obstacle-at(x10,y2);
+		obstacle-at(x10,y3);
+		obstacle-at(x10,y5);
+		obstacle-at(x11,y2);
+		obstacle-at(x11,y3);
+		obstacle-at(x11,y5);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+non-fluents nf_crossing_traffic_inst_mdp__19 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11};
+		ypos : {y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+		NORTH(y7,y8);
+		SOUTH(y8,y7);
+		NORTH(y8,y9);
+		SOUTH(y9,y8);
+		NORTH(y9,y10);
+		SOUTH(y10,y9);
+		NORTH(y10,y11);
+		SOUTH(y11,y10);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+		EAST(x7,x8);
+		WEST(x8,x7);
+		EAST(x8,x9);
+		WEST(x9,x8);
+		EAST(x9,x10);
+		WEST(x10,x9);
+		EAST(x10,x11);
+		WEST(x11,x10);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x11);
+		MIN-YPOS(y1);
+		MAX-YPOS(y11);
+
+		GOAL(x11,y11);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__19 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__19;
+	init-state {
+		robot-at(x11,y1);
+		obstacle-at(x1,y3);
+		obstacle-at(x1,y5);
+		obstacle-at(x1,y10);
+		obstacle-at(x2,y3);
+		obstacle-at(x2,y5);
+		obstacle-at(x2,y6);
+		obstacle-at(x2,y8);
+		obstacle-at(x2,y10);
+		obstacle-at(x3,y6);
+		obstacle-at(x3,y7);
+		obstacle-at(x3,y8);
+		obstacle-at(x3,y10);
+		obstacle-at(x4,y2);
+		obstacle-at(x4,y3);
+		obstacle-at(x4,y4);
+		obstacle-at(x4,y7);
+		obstacle-at(x4,y8);
+		obstacle-at(x5,y4);
+		obstacle-at(x5,y5);
+		obstacle-at(x5,y6);
+		obstacle-at(x5,y8);
+		obstacle-at(x5,y9);
+		obstacle-at(x5,y10);
+		obstacle-at(x6,y2);
+		obstacle-at(x6,y3);
+		obstacle-at(x6,y4);
+		obstacle-at(x6,y6);
+		obstacle-at(x6,y7);
+		obstacle-at(x6,y10);
+		obstacle-at(x7,y2);
+		obstacle-at(x7,y4);
+		obstacle-at(x7,y5);
+		obstacle-at(x7,y6);
+		obstacle-at(x7,y7);
+		obstacle-at(x8,y6);
+		obstacle-at(x8,y7);
+		obstacle-at(x8,y8);
+		obstacle-at(x8,y10);
+		obstacle-at(x9,y3);
+		obstacle-at(x9,y5);
+		obstacle-at(x9,y9);
+		obstacle-at(x10,y4);
+		obstacle-at(x10,y7);
+		obstacle-at(x10,y8);
+		obstacle-at(x11,y3);
+		obstacle-at(x11,y4);
+		obstacle-at(x11,y6);
+		obstacle-at(x11,y8);
+		obstacle-at(x11,y9);
+		obstacle-at(x11,y10);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+non-fluents nf_crossing_traffic_inst_mdp__20 {
+	domain = crossing_traffic_mdp;
+	objects {
+		xpos : {x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11};
+		ypos : {y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12};
+	};
+	non-fluents {
+		NORTH(y1,y2);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		NORTH(y3,y4);
+		SOUTH(y4,y3);
+		NORTH(y4,y5);
+		SOUTH(y5,y4);
+		NORTH(y5,y6);
+		SOUTH(y6,y5);
+		NORTH(y6,y7);
+		SOUTH(y7,y6);
+		NORTH(y7,y8);
+		SOUTH(y8,y7);
+		NORTH(y8,y9);
+		SOUTH(y9,y8);
+		NORTH(y9,y10);
+		SOUTH(y10,y9);
+		NORTH(y10,y11);
+		SOUTH(y11,y10);
+		NORTH(y11,y12);
+		SOUTH(y12,y11);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		WEST(x3,x2);
+		EAST(x3,x4);
+		WEST(x4,x3);
+		EAST(x4,x5);
+		WEST(x5,x4);
+		EAST(x5,x6);
+		WEST(x6,x5);
+		EAST(x6,x7);
+		WEST(x7,x6);
+		EAST(x7,x8);
+		WEST(x8,x7);
+		EAST(x8,x9);
+		WEST(x9,x8);
+		EAST(x9,x10);
+		WEST(x10,x9);
+		EAST(x10,x11);
+		WEST(x11,x10);
+
+		MIN-XPOS(x1);
+		MAX-XPOS(x11);
+		MIN-YPOS(y1);
+		MAX-YPOS(y12);
+
+		GOAL(x11,y12);
+
+		INPUT-RATE = 0.3;
+	};
+}
+
+instance crossing_traffic_inst_mdp__20 {
+	domain = crossing_traffic_mdp;
+	non-fluents = nf_crossing_traffic_inst_mdp__20;
+	init-state {
+		robot-at(x11,y1);
+		obstacle-at(x1,y2);
+		obstacle-at(x1,y3);
+		obstacle-at(x1,y4);
+		obstacle-at(x1,y5);
+		obstacle-at(x1,y8);
+		obstacle-at(x1,y10);
+		obstacle-at(x2,y7);
+		obstacle-at(x2,y8);
+		obstacle-at(x3,y3);
+		obstacle-at(x3,y5);
+		obstacle-at(x3,y7);
+		obstacle-at(x3,y8);
+		obstacle-at(x3,y10);
+		obstacle-at(x4,y5);
+		obstacle-at(x4,y6);
+		obstacle-at(x4,y9);
+		obstacle-at(x4,y10);
+		obstacle-at(x4,y11);
+		obstacle-at(x5,y2);
+		obstacle-at(x5,y4);
+		obstacle-at(x5,y8);
+		obstacle-at(x5,y9);
+		obstacle-at(x5,y10);
+		obstacle-at(x6,y4);
+		obstacle-at(x6,y6);
+		obstacle-at(x6,y7);
+		obstacle-at(x6,y9);
+		obstacle-at(x6,y10);
+		obstacle-at(x6,y11);
+		obstacle-at(x7,y3);
+		obstacle-at(x7,y7);
+		obstacle-at(x7,y8);
+		obstacle-at(x7,y9);
+		obstacle-at(x7,y11);
+		obstacle-at(x8,y2);
+		obstacle-at(x8,y3);
+		obstacle-at(x8,y7);
+		obstacle-at(x8,y8);
+		obstacle-at(x9,y5);
+		obstacle-at(x9,y7);
+		obstacle-at(x9,y8);
+		obstacle-at(x9,y9);
+		obstacle-at(x9,y11);
+		obstacle-at(x10,y4);
+		obstacle-at(x10,y7);
+		obstacle-at(x10,y9);
+		obstacle-at(x10,y11);
+		obstacle-at(x11,y5);
+		obstacle-at(x11,y6);
+		obstacle-at(x11,y8);
+		obstacle-at(x11,y10);
+		obstacle-at(x11,y11);
+	};
+	max-nondef-actions = 1;
+	horizon = 40;
+	discount = 1.0;
+}
+
+
+
+
+
+
+
+
+
