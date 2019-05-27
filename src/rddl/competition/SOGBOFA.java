@@ -330,7 +330,7 @@ public class SOGBOFA {
 				// get all parameters
 				instanceName = args[0];
 				port = Integer.valueOf(args[1]);
-				clientName = args[2];
+				clientName = "L_C_SOGBOFA";
 				
 				//connect to the server
 				//get back the content of the rddl files

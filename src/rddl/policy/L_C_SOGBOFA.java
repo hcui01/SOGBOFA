@@ -2,7 +2,6 @@ package rddl.policy;
 
 
 import rddl.competition.Records;
-import rddl.competition.Team3;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -19,13 +18,13 @@ import rddl.State;
 
 import rddl.*;
 
-public class Y_F extends Policy {
+public class L_C_SOGBOFA extends Policy {
 	
-	public Y_F () {
+	public L_C_SOGBOFA () {
 		super();
 	}
 	
-	public Y_F(String instance_name) {
+	public L_C_SOGBOFA(String instance_name) {
 		super(instance_name);
 		Global.ifLift = true;
 		Global.ifRecordLift = true;
