@@ -22,7 +22,7 @@ import rddl.RDDL.TYPE_NAME;
 public class TrafficDisplay extends StateViz {
 
 	public TrafficDisplay() {
-		_nTimeDelay = 0; // in milliseconds
+		_nTimeDelay = 200; // in milliseconds
 	}
 
 	public TrafficDisplay(int time_delay_per_frame) {
@@ -31,15 +31,21 @@ public class TrafficDisplay extends StateViz {
 	
 	public boolean _bSuppressNonFluents = true;
 	public BlockDisplay _bd = null;
-	public int _nTimeDelay = 0;
+	public int _nTimeDelay;
 	
 	public void display(State s, int time) {
-		System.out.println("TIME = " + time + ": " + getStateDescription(s));
+		try {
+			System.out.println("TIME = " + time + ": " + getStateDescription(s));
+		} catch (EvalException e) {
+			System.out.println("\n\nError during visualization:\n" + e);
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////
 
-	public String getStateDescription(State s) {
+	public String getStateDescription(State s) throws EvalException {
 		StringBuilder sb = new StringBuilder();
 
 		TYPE_NAME cell_type = new TYPE_NAME("cell");

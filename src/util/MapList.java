@@ -19,7 +19,7 @@ import graph.*;
  * @author Scott Sanner
  * @language Java (JDK 1.3)
  */
-public class MapList {
+public class MapList implements Cloneable, Serializable{
 
 	public Map _hm;
 	public boolean _bUnique; // Restricts to unique values (i.e., a map interpretation)

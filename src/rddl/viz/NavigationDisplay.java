@@ -36,12 +36,18 @@ public class NavigationDisplay extends StateViz {
 	public int _nTimeDelay = 0;
 	
 	public void display(State s, int time) {
-		System.out.println("TIME = " + time + ": " + getStateDescription(s));
+		try {
+			System.out.println("TIME = " + time + ": " + getStateDescription(s));
+		} catch (EvalException e) {
+			System.out.println("\n\nError during visualization:\n" + e);
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////
 
-	public String getStateDescription(State s) {
+	public String getStateDescription(State s) throws EvalException {
 		StringBuilder sb = new StringBuilder();
 
 		TYPE_NAME xpos_type = new TYPE_NAME("xpos");
@@ -71,8 +77,8 @@ public class NavigationDisplay extends StateViz {
 		_bd.clearAllLines();
 		for (LCONST xpos : list_xpos) {
 			for (LCONST ypos : list_ypos) {
-				int col = new Integer(xpos.toString().substring(1, xpos.toString().length()));
-				int row = new Integer(ypos.toString().substring(1, ypos.toString().length()));
+				int col = new Integer(xpos.toString().substring(2, xpos.toString().length()));
+				int row = new Integer(ypos.toString().substring(2, ypos.toString().length()));
 				if (IS_OBFUSCATED) {
 					row = (int)Math.sqrt(row - 11);
 					col = (int)Math.sqrt(col - 5);

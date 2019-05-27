@@ -10,10 +10,26 @@
 
 package rddl.validate;
 
+import java.io.File;
+
+import rddl.RDDL;
+import rddl.parser.parser;
+import rddl.policy.NoopPolicy;
+import rddl.policy.Policy;
+import rddl.sim.Result;
+import rddl.sim.Simulator;
+import rddl.viz.GenericScreenDisplay;
+import rddl.viz.NullScreenDisplay;
+import rddl.viz.StateViz;
+
 public class StaticValidator {
 
+	// Note when objects are referenced but not declared in object lists
+	
 	// Ensure that all pvariable references in expressions refer to
 	// defined pvariables
+	
+	// CPF definitions must reference all variables
 	
 	// Mark expression types and verify correct type usage (i.e., can't put
 	// an integer pvariable in a boolean expression)
@@ -36,4 +52,8 @@ public class StaticValidator {
 	// Make sure variable names are not identical (done now in RDDL.addDefs)
 	
 	// Object names cannot be reserved words
+
+	// Only reward and observations can reference next-state variables
+	
+	// Check for illegal default values (0 for boolean)
 }

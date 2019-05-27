@@ -1,5 +1,5 @@
 /**
- * RDDL: Main server code for interaction with RDDLSim client
+lient * RDDL: Main server code for interaction with RDDLSim client
  * 
  * @author Sungwook Yoon (sungwook.yoon@gmail.com)
  * @version 10/1/10
@@ -17,10 +17,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -28,6 +33,7 @@ import java.util.Random;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
@@ -48,31 +54,36 @@ import util.Timer;
 
 public class Server implements Runnable {
 	
-	public static double timeAllowed;
-	
 	public static final boolean SHOW_ACTIONS = true;
 	public static final boolean SHOW_XML = false;
 	public static final boolean SHOW_MSG = false;
 	public static final boolean SHOW_TIMING = false;
 	
-	private static final String LOG_FILE = "rddl";
 	/**
 	 * following is XML definitions
 	 */
 	public static final String SESSION_REQUEST = "session-request";
 	public static final String CLIENT_NAME = "client-name";
 	public static final String INSTANCE_NAME = "instance-name";
+    public static final String INPUT_LANGUAGE = "input-language";
 	public static final String PROBLEM_NAME = "problem-name";
+	public static final String INPUT_LANG = "input-language";
 	public static final String SESSION_INIT = "session-init";
 	public static final String SESSION_ID = "session-id";
+    public static final String TASK_DESC = "task";
 	public static final String SESSION_END = "session-end";
 	public static final String TOTAL_REWARD = "total-reward";
-	public static final String TIME_SPENT = "time-spent";
+	public static final String IMMEDIATE_REWARD = "immediate-reward";
 	public static final String NUM_ROUNDS = "num-rounds";
 	public static final String TIME_ALLOWED = "time-allowed";
 	public static final String ROUNDS_USED = "rounds-used";
 	
+	public static final String CLIENT_INFO = "client-info";
+	public static final String CLIENT_HOSTNAME = "client-hostname";
+	public static final String CLIENT_IP = "client-ip";
+	
 	public static final String ROUND_REQUEST = "round-request";
+    public static final String EXECUTE_POLICY = "execute-policy";
 	public static final String ROUND_INIT = "round-init";
 	public static final String ROUND_NUM = "round-num";
 	public static final String ROUND_LEFT = "round-left";
@@ -109,25 +120,30 @@ public class Server implements Runnable {
 	
 	
 	private Socket connection;
-	private String TimeStamp;
 	private RDDL rddl = null;
 	private static int ID = 0;
-	private static int DEFAULT_NUM_ROUNDS = 20;
-	private static double DEFAULT_TIME_ALLOWED = 30;
+	private static int DEFAULT_NUM_ROUNDS = 30;
+	private static long DEFAULT_TIME_ALLOWED = 1080000; // milliseconds = 18 minutes
+	private static boolean USE_TIMEOUT = true;
+	private static boolean INDIVIDUAL_SESSION = false;
+	private static String LOG_FILE = "rddl";
+	private static boolean MONITOR_EXECUTION = false;
+	private static String SERVER_FILES_DIR = "";
+	private static String CLIENT_FILES_DIR = "";
+    
 	public int port;
 	public int id;
 	public String clientName = null;
 	public String requestedInstance = null;
-	public Random rand;
-	
+	public RandomDataGenerator rand;
+    public boolean executePolicy = true;
+    public String inputLanguage = "rddl";
 	
 	public State      state;
 	public INSTANCE   instance;
 	public NONFLUENTS nonFluents;
 	public DOMAIN     domain;
 	public StateViz   stateViz;
-	
-	public static int mode;
 	
 	/**
 	 * 
@@ -137,83 +153,90 @@ public class Server implements Runnable {
 	 * 3. (optional) random seed
 	 */
 	public static void main(String[] args) {
-		double timeInterval = 5;
-		double startingTime = 5;
-		double endTime = 60;
 		
-//		for(timeAllowed = startingTime; timeAllowed <= endTime; timeAllowed += timeInterval ){
-			// StateViz state_viz = new GenericScreenDisplay(true); 
-			StateViz state_viz = new NullScreenDisplay(false);
+		// StateViz state_viz = new GenericScreenDisplay(true); 
+		StateViz state_viz = new NullScreenDisplay(false);
 
-			ArrayList<RDDL> rddls = new ArrayList<RDDL>();
-			int port = PORT_NUMBER;
-			if ( args.length < 1 ) {
-				System.out.println("usage: rddlfilename (optional) portnumber num-rounds random-seed startingTime timePlus state-viz-class-name ");
-				System.out.println("\nexample 1: Server rddlfilename");
-				System.out.println("example 2: Server rddlfilename 2323");
-				System.out.println("example 3: Server rddlfilename 2323 100 0 rddl.viz.GenericScreenDisplay");
-				System.exit(1);
-			}
-			
-			try {
-				// Load RDDL files
-				RDDL rddl = new RDDL();
-				File f = new File(args[0]);
-				if (f.isDirectory()) {
-					for (File f2 : f.listFiles())
-						if (f2.getName().endsWith(".rddl")) {
-							System.out.println("Loading: " + f2);
-							rddl.addOtherRDDL(parser.parse(f2));
-						}
-				} else
-					rddl.addOtherRDDL(parser.parse(f));
+		ArrayList<RDDL> rddls = new ArrayList<RDDL>();
+		int port = PORT_NUMBER;
+		if ( args.length < 1 ) {
+			System.out.println("usage: rddlfilename-or-dir (optional) portnumber num-rounds random-seed use-timeout individual-session log-folder monitor-execution state-viz-class-name");
+			System.out.println("\nexample 1: Server rddlfilename-or-dir");
+			System.out.println("example 2: Server rddlfilename-or-dir 2323");
+			System.out.println("example 3: Server rddlfilename-or-dir 2323 100 0 0 1 experiments/experiment23/ 1 rddl.viz.GenericScreenDisplay");
+			System.exit(1);
+		}
+		
+		try {
+			// Load RDDL files
+			SERVER_FILES_DIR = new String(args[0]);
+			CLIENT_FILES_DIR = new String(args[0]);
 
-				if ( args.length > 1) {
-					port = Integer.valueOf(args[1]);
+			File[] subDirs = new File(args[0]).listFiles(File::isDirectory);
+			// Check if there are subdirectories called "client" and "server"
+			for (File subDir : subDirs) {
+				if (subDir.getName().equals("server")) {
+				SERVER_FILES_DIR =  new String(subDir.getPath());
+				} else if (subDir.getName().equals("client")) {
+					CLIENT_FILES_DIR =  new String(subDir.getPath());
 				}
-				ServerSocket socket1 = new ServerSocket(port);
-				if (args.length > 2) {
-					DEFAULT_NUM_ROUNDS = Integer.valueOf(args[2]);
-				}
-				int rand_seed = -1;
-				if ( args.length > 3) {
-					rand_seed = Integer.valueOf(args[3]);
-				} else {
-					rand_seed = DEFAULT_SEED;
-				}
-				if (args.length > 4) {
-					startingTime = Double.valueOf(args[4]);
-				}
-				if (args.length > 5) {
-					timeInterval = Double.valueOf(args[5]);
-					if(timeInterval > 0){
-						mode = 1;
-					}
-					else{
-						mode = 0;
-					}
-				}
-				if (args.length > 6) {
-					state_viz = (StateViz)Class.forName(args[6]).newInstance();
-				}
-				System.out.println("RDDL Server Initialized");
-				timeAllowed = startingTime - 2 * timeInterval;
-				while (true) {
-					timeAllowed += timeInterval;
-					Socket connection = null;
-					connection = socket1.accept();
-					Runnable runnable = new Server(connection, ++ID, rddl, state_viz, port, new Random(rand_seed));
-					Thread thread = new Thread(runnable);
-					thread.start();
-				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				System.out.println(e);
-				e.printStackTrace();
 			}
-//		}
+
+			RDDL rddl = new RDDL(SERVER_FILES_DIR);
+
+			if ( args.length > 1) {
+				port = Integer.valueOf(args[1]);
+			}
+			ServerSocket socket1 = new ServerSocket(port);
+			if (args.length > 2) {
+				DEFAULT_NUM_ROUNDS = Integer.valueOf(args[2]);
+			}
+			int rand_seed = -1;
+			if ( args.length > 3) {
+				rand_seed = Integer.valueOf(args[3]);
+			} else {
+				rand_seed = DEFAULT_SEED;
+			}
+            if (args.length > 4) {
+                if (args[4].equals("1"))
+                    INDIVIDUAL_SESSION = true;
+            }
+            if (args.length > 5) {
+                if (args[5].equals("0")) {
+                    USE_TIMEOUT = false;
+		} else {
+			USE_TIMEOUT = true;
+			DEFAULT_TIME_ALLOWED = Integer.valueOf(args[5]) * 1000;
+		}
+            }
+            if (args.length > 6) {
+                LOG_FILE = args[6] + "/logs";
+            }
+            if (args.length > 7) {
+                assert(args[7].equals("0") || args[7].equals("1"));
+                if (args[7].equals("1")) {
+                    MONITOR_EXECUTION = true;
+                }
+            }
+			if (args.length > 8) {
+				state_viz = (StateViz)Class.forName(args[8]).newInstance();
+			}
+			System.out.println("RDDL Server Initialized");
+			while (true) {
+				Socket connection = socket1.accept();
+				RandomDataGenerator rdg = new RandomDataGenerator();
+				rdg.reSeed(rand_seed + ID); // Ensures predictable but different seed on every session if a single client connects and all session requests run in same order
+				Runnable runnable = new Server(connection, ++ID, rddl, state_viz, port, rdg);
+				Thread thread = new Thread(runnable);
+				thread.start();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println(e);
+			e.printStackTrace();
+		}
 	}
-	Server (Socket s, int i, RDDL rddl, StateViz state_viz, int port, Random rgen) {
+	Server (Socket s, int i, RDDL rddl, StateViz state_viz, int port, RandomDataGenerator rgen) {
 		this.connection = s;
 		this.id = i;
 		this.rddl = rddl;
@@ -224,15 +247,24 @@ public class Server implements Runnable {
 	public void run() {
 		DOMParser p = new DOMParser();
 		int numRounds = DEFAULT_NUM_ROUNDS;
-//		double timeAllowed = DEFAULT_TIME_ALLOWED;
-		double timeUsed = 0;
+		long timeAllowed = DEFAULT_TIME_ALLOWED;
+				
 		try {
+			
+			// Log client host name and IP address
+			InetAddress ia = connection.getInetAddress();
+			String client_hostname = ia.getCanonicalHostName();
+			String client_IP = ia.getHostAddress();
+			long start_time = System.currentTimeMillis();
+			System.out.println("Connection from client address: " + client_hostname + " / " + client_IP);
+			writeToLog(createClientHostMessage(client_hostname, client_IP));
+			
+			// Begin communication protocol from PROTOCOL.txt
 			BufferedInputStream isr = new BufferedInputStream(connection.getInputStream());
-			//InputStreamReader isr = new InputStreamReader(is);
 			InputSource isrc = readOneMessage(isr);
 			requestedInstance = null;
 			processXMLSessionRequest(p, isrc, this);
-			System.out.println(requestedInstance);
+			System.out.println("Instance requested: " + requestedInstance);
 	
 			if (!rddl._tmInstanceNodes.containsKey(requestedInstance)) {
 				System.out.println("Instance name '" + requestedInstance + "' not found.");
@@ -242,41 +274,45 @@ public class Server implements Runnable {
 			BufferedOutputStream os = new BufferedOutputStream(connection.getOutputStream());
 			OutputStreamWriter osw = new OutputStreamWriter(os, "US-ASCII");
 			String msg = createXMLSessionInit(numRounds, timeAllowed, this);
+			boolean OUT_OF_TIME = false;
 			sendOneMessage(osw,msg);			
 
 			initializeState(rddl, requestedInstance);
 			//System.out.println("STATE:\n" + state);
 			
 			double accum_total_reward = 0d;
-			ArrayList<Double> rewards = new ArrayList<Double>(DEFAULT_NUM_ROUNDS * instance._nHorizon);
+			ArrayList<Double> rewards = new ArrayList<Double>();
 			int r = 0;
-			long session_elapsed_time = 0l;
 			double[] rewardArray = new double[numRounds];
-			for( ; r < numRounds; r++ ) {			
+			for( ; r < numRounds && !OUT_OF_TIME; r++ ) {
+				if (!executePolicy) {
+					r--;
+				}
 				isrc = readOneMessage(isr);
-				if ( !processXMLRoundRequest(p, isrc) ) {
+				if ( !processXMLRoundRequest(p, isrc, this) ) {
 					break;
 				}
-				resetState();
-				msg = createXMLRoundInit(r+1, numRounds, timeUsed, timeAllowed);
-				sendOneMessage(osw,msg);
 				
-				long start_round_time = System.currentTimeMillis();
-				System.out.println("Round " + (r+1) + " / " + numRounds);
-				if (SHOW_MEMORY_USAGE)
-					System.out.print("[ Memory usage: " + 
+				resetState();
+				msg = createXMLRoundInit(r+1, numRounds, timeAllowed - System.currentTimeMillis() + start_time, timeAllowed);
+			sendOneMessage(osw,msg);
+				
+				if (executePolicy) {
+					System.out.println("Round " + (r+1) + " / " + numRounds + ", time remaining: " + (timeAllowed - System.currentTimeMillis() + start_time));
+					if (SHOW_MEMORY_USAGE)
+						System.out.print("[ Memory usage: " + 
 							_df.format((RUNTIME.totalMemory() - RUNTIME.freeMemory())/1e6d) + "Mb / " + 
 							_df.format(RUNTIME.totalMemory()/1e6d) + "Mb" + 
 							" = " + _df.format(((double) (RUNTIME.totalMemory() - RUNTIME.freeMemory()) / 
 											   (double) RUNTIME.totalMemory())) + " ]\n");
-				
+				}
+
+				double immediate_reward = 0.0d;
 				double accum_reward = 0.0d;
 				double cur_discount = 1.0d;
 				int h = 0;
 				HashMap<PVAR_NAME, HashMap<ArrayList<LCONST>, Object>> observStore =null;
-				
-				for( ; h < instance._nHorizon; h++ ) {
-					
+				while (true) {
 					Timer timer = new Timer();
 				
 					//if ( observStore != null) {
@@ -287,7 +323,7 @@ public class Server implements Runnable {
 					//		}
 					//	}
 					//}
-					msg = createXMLTurn(state, h+1, domain, observStore);
+					msg = createXMLTurn(state, h+1, domain, observStore, timeAllowed - System.currentTimeMillis() + start_time, immediate_reward);
 					
 					if (SHOW_TIMING)
 						System.out.println("**TIME to create XML turn: " + timer.GetTimeSoFarAndReset());
@@ -315,14 +351,24 @@ public class Server implements Runnable {
 					//if ( h== 0 && domain._bPartiallyObserved && ds.size() != 0) {
 					//	System.err.println("the first action for partial observable domain should be noop");
 					//}
-					if (SHOW_ACTIONS)
+					if (SHOW_ACTIONS && executePolicy) {
+						boolean suppress_object_cast_temp = RDDL.SUPPRESS_OBJECT_CAST;
+						RDDL.SUPPRESS_OBJECT_CAST = true;
 						System.out.println("** Actions received: " + ds);
+						RDDL.SUPPRESS_OBJECT_CAST = suppress_object_cast_temp;
+					}
 					
-					// Check state-action constraints (also checks maxNonDefActions)
+					// Check action preconditions (also checks maxNonDefActions)
 					try {
 						state.checkStateActionConstraints(ds);
 					} catch (Exception e) {
-						System.out.println("TRIAL ERROR -- STATE-ACTION CONSTRAINT VIOLATION:\n" + e);
+						System.out.println("TRIAL ERROR -- ACTION NOT APPLICABLE:\n" + e);
+						if (INDIVIDUAL_SESSION) {
+							try {
+								connection.close();
+							} catch (IOException ioe){}
+							System.exit(1);
+						}
 						break;
 					}
 					
@@ -331,8 +377,13 @@ public class Server implements Runnable {
 					} catch (Exception ee) {
 						System.out.println("FATAL SERVER EXCEPTION:\n" + ee);
 						//ee.printStackTrace();
+						if (INDIVIDUAL_SESSION) {
+							try {
+								connection.close();
+							} catch (IOException ioe){}
+							System.exit(1);
+						}
 						throw ee;
-						//System.exit(1);
 					}
 					//for ( PVAR_NAME pn : state._observ.keySet() ) {
 					//	System.out.println("check1 " + pn);
@@ -348,14 +399,10 @@ public class Server implements Runnable {
 						observStore = copyObserv(state._observ);
 					
 					// Calculate reward / objective and store
-					double reward = ((Number)domain._exprReward.sample(new HashMap<LVAR,LCONST>(), 
+					immediate_reward = ((Number)domain._exprReward.sample(new HashMap<LVAR,LCONST>(), 
 							state, rand)).doubleValue();
-
-					// finish recording
-					
-					
-					rewards.add(reward);
-					accum_reward += cur_discount * reward;
+					rewards.add(immediate_reward);
+					accum_reward += cur_discount * immediate_reward;
 					//System.out.println("Accum reward: " + accum_reward + ", instance._dDiscount: " + instance._dDiscount + 
 					//   " / " + (cur_discount * reward) + " / " + reward);
 					cur_discount *= instance._dDiscount;
@@ -368,25 +415,35 @@ public class Server implements Runnable {
 					
 					if (SHOW_TIMING)
 						System.out.println("**TIME to advance state: " + timer.GetTimeSoFarAndReset());
+										
+					// Scott: Update 2014 to check for out of time... this can trigger
+					//        an early round end
+					// TODO: check that this works
+					OUT_OF_TIME = ((System.currentTimeMillis() - start_time) > timeAllowed) && USE_TIMEOUT;
+					h++;
+
+					if (OUT_OF_TIME || ((instance._termCond == null) && (h == instance._nHorizon)) ||
+					   ((instance._termCond != null) && state.checkTerminationCondition(instance._termCond))) {
+						break;
+					}
 				}
-				rewardArray[r] = accum_reward;
-				accum_total_reward += accum_reward;
-				long elapsed_time = System.currentTimeMillis() - start_round_time;
-				session_elapsed_time += elapsed_time;
-				msg = createXMLRoundEnd(requestedInstance, r, accum_reward, h, elapsed_time, clientName);
+				if (executePolicy) {
+					rewardArray[r] = accum_reward;
+					accum_total_reward += accum_reward;
+					System.out.println("** Round reward: " + accum_reward);
+				}
+				msg = createXMLRoundEnd(requestedInstance, r, accum_reward, h,
+							timeAllowed - System.currentTimeMillis() + start_time,
+                                                        clientName, immediate_reward);
 				if (SHOW_MSG)
 					System.out.println("Sending msg:\n" + msg);
 				sendOneMessage(osw, msg);
 				
 				writeToLog(msg);
 			}
-			msg = createXMLSessionEnd(requestedInstance, accum_total_reward, r, session_elapsed_time, this.clientName, this.id);
-			if (SHOW_MSG)
-				System.out.println("Sending msg:\n" + msg);
-			sendOneMessage(osw, msg);
+			msg = createXMLSessionEnd(requestedInstance, accum_total_reward, r,
+						  timeAllowed - System.currentTimeMillis() + start_time, this.clientName, this.id);
 			
-			//try to record everything in server
-			//hao
 			Records record = new Records();
 			double aveReward = accum_total_reward / numRounds;
 			double sumOfErr = 0;
@@ -398,19 +455,25 @@ public class Server implements Runnable {
 				System.out.println("Records object successful!"); 
 			}
 			String domainName = domain._sDomainName;
-			if(mode == 1){
-				if(!record.fileAppend(domainName + "_" + requestedInstance + "_" + clientName + "_" + "timeIncreasing", timeAllowed + " " + aveReward + " " + sd)){
-					System.out.println("Recording data failed!"); 
-				}
-			}
-			else{
+			
 				String instanceRecord = requestedInstance.substring(requestedInstance.lastIndexOf("_")+1);
-				if(!record.fileAppend(domainName + "_instanceAll" + "_" + clientName + "_" + timeAllowed, instanceRecord + " " + aveReward + " " + sd)){
+				if(!record.fileAppend(clientName + "_" + (timeAllowed / 1000) + "_" + requestedInstance + "_" + "Score", instanceRecord + " " + aveReward + " " + sd)){
 					System.out.println("Recording data failed!"); 
 				}
-			}
+			
+			
+			if (SHOW_MSG)
+				System.out.println("Sending msg:\n" + msg);
+			sendOneMessage(osw, msg);
 
 			writeToLog(msg);
+
+			if (INDIVIDUAL_SESSION) {
+				try {
+					connection.close();
+				} catch (IOException ioe){}
+				System.exit(0);
+			}
 
 			//need to wait 10 seconds to pretend that we're processing something
 //			try {
@@ -423,6 +486,12 @@ public class Server implements Runnable {
 		catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("\n>> TERMINATING TRIAL.");
+			if (INDIVIDUAL_SESSION) {
+				try {
+					connection.close();
+				} catch (IOException ioe){}
+				System.exit(1);
+			}
 		}
 		finally {
 			try {
@@ -476,25 +545,38 @@ public class Server implements Runnable {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+                                if (INDIVIDUAL_SESSION) {
+                        		try {
+                        			connection.close();
+                        		}
+                        		catch (IOException ioe){}
+                        		System.exit(1);
+                        	}
 			}
 		}
 	}
 	
-	void resetState () throws EvalException {
-		state.init(nonFluents != null ? nonFluents._hmObjects : null, instance._hmObjects, 
+	void resetState () {
+		state.init(domain._hmObjects, nonFluents != null ? nonFluents._hmObjects : null, instance._hmObjects, 
 				domain._hmTypes, domain._hmPVariables, domain._hmCPF,
-				instance._alInitState, nonFluents == null ? null : nonFluents._alNonFluents,
-				domain._alStateConstraints, domain._exprReward, instance._nNonDefActions);
+				instance._alInitState, nonFluents == null ? new ArrayList<PVAR_INST_DEF>() : nonFluents._alNonFluents, instance._alNonFluents,
+				domain._alStateConstraints, domain._alActionPreconditions, domain._alStateInvariants, 
+				domain._exprReward, instance._nNonDefActions);
 		
 		if ((domain._bPartiallyObserved && state._alObservNames.size() == 0)
-				|| (!domain._bPartiallyObserved && state._alObservNames.size() > 0))
-			System.err.println("Domain '" + domain._sDomainName
-							+ "' partially observed flag and presence of observations mismatched.");
+				|| (!domain._bPartiallyObserved && state._alObservNames.size() > 0)) {
+			boolean observations_present = (state._alObservNames.size() > 0);
+			System.err.println("WARNING: Domain '" + domain._sDomainName
+							+ "' partially observed (PO) flag and presence of observations mismatched.\nSetting PO flag = " + observations_present + ".");
+			domain._bPartiallyObserved = observations_present;
+		}
 
 	}
 	
 	static Object getValue(String pname, String pvalue, State state) {
-		TYPE_NAME tname = state._hmPVariables.get(new PVAR_NAME(pname))._sRange;
+		
+		// Get the fluent value's range
+		TYPE_NAME tname = state._hmPVariables.get(new PVAR_NAME(pname))._typeRange;
 		
 		// TYPE_NAMES are interned so that equality can be tested directly
 		// (also helps enforce better type safety)
@@ -510,14 +592,15 @@ public class Server implements Runnable {
 			return Double.valueOf(pvalue);
 		}	
 		
-		// TODO: should really verify tname is an enum val here by looking up
-		// it's definition
+		// TODO: handle vectors <>
+		// TODO: are enum int values handled correctly?  need an @ 
+		
+		// This allows object vals
+		// TODO: should really verify tname is an enum val here by looking up it's definition
 		if ( pvalue.startsWith("@") ) {
 			// Must be an enum
 			return new ENUM_VAL(pvalue);
 		} else {			
-			// TODO: who calls this method?  Is it only for fluent values?  Or also args?
-			// for now we'll allow objects
 			return new OBJECT_VAL(pvalue);
 		}
 		
@@ -574,11 +657,11 @@ public class Server implements Runnable {
 						//System.out.println("arg: " + arg);
 						if (arg.startsWith("@"))
 							lcArgs.add(new RDDL.ENUM_VAL(arg));
-						else 
+						else // TODO $ <> (forgiving)... done$
 							lcArgs.add(new RDDL.OBJECT_VAL(arg));
 					}
 					String pvalue = getTextValue(el, ACTION_VALUE).get(0);
-					Object value = getValue(name, pvalue, state);
+					Object value = getValue(name, pvalue, state); // TODO $ <> (forgiving)... done$
 					PVAR_INST_DEF d = new PVAR_INST_DEF(name, value, lcArgs);
 					ds.add(d);
 				}
@@ -597,7 +680,6 @@ public class Server implements Runnable {
 			System.out.println("FATAL SERVER ERROR:\n" + e);
 			//t.printStackTrace();
 			throw e;
-			//System.exit(1);
 		}
 	}
 	
@@ -612,7 +694,7 @@ public class Server implements Runnable {
 		osw.flush();
 	}
 	
-	public static final int MAX_BYTES = 1048576;
+	public static final int MAX_BYTES = 10485760;
 	public static byte[] bytes = new byte[MAX_BYTES];
 	
 	// Synchronize because this uses a global bytes[] buffer
@@ -649,6 +731,23 @@ public class Server implements Runnable {
 		}
 	}
 	
+	static public String createClientHostMessage(String client_hostname, String client_IP) {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		try {
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document dom = db.newDocument();
+			Element rootEle = dom.createElement(CLIENT_INFO);
+			dom.appendChild(rootEle);
+			addOneText(dom,rootEle,CLIENT_HOSTNAME, client_hostname);
+			addOneText(dom,rootEle,CLIENT_IP, client_IP);
+			return Client.serialize(dom);
+		}
+		catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
+	}
+	
 	static String createXMLSessionInit (int numRounds, double timeAllowed, Server server) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
@@ -656,9 +755,38 @@ public class Server implements Runnable {
 			Document dom = db.newDocument();
 			Element rootEle = dom.createElement(SESSION_INIT);
 			dom.appendChild(rootEle);
-			addOneText(dom,rootEle,SESSION_ID, server.id + "");
-			addOneText(dom,rootEle,NUM_ROUNDS, numRounds + "");
-			addOneText(dom,rootEle,TIME_ALLOWED, timeAllowed + "");
+
+			INSTANCE instance = server.rddl._tmInstanceNodes.get(server.requestedInstance);
+			DOMAIN domain = server.rddl._tmDomainNodes.get(instance._sDomain);
+
+			String domainFile = CLIENT_FILES_DIR + "/" + domain._sFileName + "." + server.inputLanguage;
+			String instanceFile = CLIENT_FILES_DIR + "/" + instance._sFileName + "." + server.inputLanguage;
+
+			// NONFLUENTS nonFluents = null;
+			// if (instance._sNonFluents != null) {
+			//     nonFluents = server.rddl._tmNonFluentNodes.get(instance._sNonFluents);
+			// }
+			StringBuilder task = new StringBuilder(new String(Files.readAllBytes(Paths.get(domainFile))));
+			// if (nonFluents != null) {
+			// task.append(System.getProperty("line.separator"));
+			// task.append(System.getProperty("line.separator"));
+ 			// task.append(new String(Files.readAllBytes(Paths.get(nonFluents._sFileName))));
+			// }
+			task.append(System.getProperty("line.separator"));
+			task.append(System.getProperty("line.separator"));
+			task.append(new String(Files.readAllBytes(Paths.get(instanceFile))));
+			task.append(System.getProperty("line.separator"));
+
+			// We have to send the description encoded to Base64 as "<"
+			// and ">" signs are replaced in XML text by &lt; and &gt;,
+			// respectively. This seems the cleanest solution, even
+			// though it requires the client to decode the description.
+			byte[] encodedBytes = Base64.getEncoder().encode(task.toString().getBytes());
+
+			addOneText(dom, rootEle, TASK_DESC, new String(encodedBytes));
+			addOneText(dom, rootEle, SESSION_ID, server.id + "");
+			addOneText(dom, rootEle, NUM_ROUNDS, numRounds + "");
+			addOneText(dom, rootEle, TIME_ALLOWED, timeAllowed + "");
 			return Client.serialize(dom);
 		}
 		catch (Exception e) {
@@ -675,6 +803,12 @@ public class Server implements Runnable {
 			if ( e.getNodeName().equals(SESSION_REQUEST) ) {
 				server.requestedInstance = getTextValue(e, PROBLEM_NAME).get(0);
 				server.clientName = getTextValue(e,CLIENT_NAME).get(0);
+				ArrayList<String> lang = getTextValue(e, INPUT_LANGUAGE);
+				if (lang != null && lang.size() > 0) {
+					if (lang.get(0).trim().equals("pddl")) {
+						server.inputLanguage = "pddl";
+ 					}
+				}
 				NodeList nl = e.getElementsByTagName(NO_XML_HEADER);
 				if ( nl.getLength() > 0 ) {
 					NO_XML_HEADING = true;
@@ -691,11 +825,28 @@ public class Server implements Runnable {
 		return;
 	}
 	
-	static boolean processXMLRoundRequest (DOMParser p, InputSource isrc) {
+	static boolean processXMLRoundRequest (DOMParser p, InputSource isrc,
+                                           Server server) {
         try {
 			p.parse(isrc);
 			Element e = p.getDocument().getDocumentElement();
 			if ( e.getNodeName().equals(ROUND_REQUEST) ) {
+                if (MONITOR_EXECUTION) {
+                    System.out.println("Monitoring execution!");
+                    String executePolicyString = "no";
+                    ArrayList<String> exec_pol = getTextValue(e, EXECUTE_POLICY);
+                    if (exec_pol != null && exec_pol.size() > 0) {
+                        executePolicyString = exec_pol.get(0).trim();
+                    }
+                    if (executePolicyString.equals("yes")) {
+                        server.executePolicy = true;
+                    } else {
+                        assert(executePolicyString.equals("no"));
+                        server.executePolicy = false;
+                        System.out.println("Do not execute the policy!");
+                    }
+                    
+                }
 				return true;			
 			}
 			return false;
@@ -724,7 +875,8 @@ public class Server implements Runnable {
 	}
 	
 	static String createXMLTurn (State state, int turn, DOMAIN domain,
-			HashMap<PVAR_NAME, HashMap<ArrayList<LCONST>, Object>> observStore) throws Exception {
+                                     HashMap<PVAR_NAME, HashMap<ArrayList<LCONST>, Object>> observStore,
+                                     double timeLeft, double immediateReward) throws Exception {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -735,6 +887,14 @@ public class Server implements Runnable {
 			Text textTurnNum = dom.createTextNode(turn + "");
 			turnNum.appendChild(textTurnNum);
 			rootEle.appendChild(turnNum);
+                        Element timeElem = dom.createElement(TIME_LEFT);
+                        Text textTimeElem = dom.createTextNode(timeLeft + "");
+                        timeElem.appendChild(textTimeElem);
+                        rootEle.appendChild(timeElem);
+                        Element immediateRewardElem = dom.createElement(IMMEDIATE_REWARD);
+                        Text textImmediateRewardElem = dom.createTextNode(immediateReward + "");
+                        immediateRewardElem.appendChild(textImmediateRewardElem);
+                        rootEle.appendChild(immediateRewardElem);
 
 			//System.out.println("PO: " + domain._bPartiallyObserved);
 			if( !domain._bPartiallyObserved || observStore != null) {
@@ -762,7 +922,7 @@ public class Server implements Runnable {
 						ofEle.appendChild(pName);
 						for ( LCONST lc : gfluent ) {
 							Element pArg = dom.createElement(FLUENT_ARG);
-							Text pTextArg = dom.createTextNode(lc.toString());
+							Text pTextArg = dom.createTextNode(lc.toSuppString()); // TODO $ <>... done$
 							pArg.appendChild(pTextArg);
 							ofEle.appendChild(pArg);
 						}
@@ -773,7 +933,10 @@ public class Server implements Runnable {
 							throw new Exception("ERROR: Could not retrieve value for " + pn + gfluent.toString());
 						}
 
-						Text pTextValue = dom.createTextNode(value.toString());
+						Text pTextValue = value instanceof LCONST 
+								? dom.createTextNode( ((LCONST)value).toSuppString())
+								: dom.createTextNode( value.toString() ); // TODO $ <>... done$
+						// dom.createTextNode(value.toString()); // TODO $ <>
 						pValue.appendChild(pTextValue);
 						ofEle.appendChild(pValue);
 					}
@@ -799,7 +962,7 @@ public class Server implements Runnable {
 		}
 	}
 	
-	static String createXMLRoundInit (int round, int numRounds, double timeUsed,
+	static String createXMLRoundInit (int round, int numRounds, double timeLeft,
 			double timeAllowed) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
@@ -809,7 +972,7 @@ public class Server implements Runnable {
 			dom.appendChild(rootEle);
 			addOneText(dom,rootEle,ROUND_NUM, round + "");
 			addOneText(dom,rootEle,ROUND_LEFT, (numRounds - round) + "");
-			addOneText(dom,rootEle,TIME_LEFT, (timeAllowed-timeUsed) + "");
+			addOneText(dom,rootEle,TIME_LEFT, timeLeft + "");
 			return Client.serialize(dom);
 		}
 		catch (Exception e) {
@@ -819,7 +982,7 @@ public class Server implements Runnable {
 	}
 	
 	static String createXMLRoundEnd (String requested_instance, int round, double reward,
-			int turnsUsed, long timeUsed, String client_name) {
+					 int turnsUsed, long timeLeft, String client_name, double immediateReward) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -831,7 +994,8 @@ public class Server implements Runnable {
 			addOneText(dom,rootEle,	ROUND_NUM, round + "");
 			addOneText(dom,rootEle, ROUND_REWARD, reward + "");			
 			addOneText(dom,rootEle, TURNS_USED, turnsUsed + "");
-			addOneText(dom,rootEle, TIME_USED, timeUsed + "");
+			addOneText(dom,rootEle, TIME_LEFT, timeLeft + "");
+                        addOneText(dom,rootEle, IMMEDIATE_REWARD, immediateReward + "");
 			return Client.serialize(dom);
 		}
 		catch (Exception e) {
@@ -849,7 +1013,7 @@ public class Server implements Runnable {
 	}
 	
 	static String createXMLSessionEnd(String requested_instance, 
-			double reward, int roundsUsed, long timeUsed,
+					  double reward, int roundsUsed, long timeLeft, 
 			String clientName, int sessionId) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
@@ -860,9 +1024,9 @@ public class Server implements Runnable {
 			addOneText(dom,rootEle,INSTANCE_NAME, requested_instance);			
 			addOneText(dom,rootEle,TOTAL_REWARD, reward + "");			
 			addOneText(dom,rootEle,ROUNDS_USED, roundsUsed + "");
-			addOneText(dom,rootEle,TIME_USED, timeUsed + "");
 			addOneText(dom,rootEle,CLIENT_NAME, clientName + "");
 			addOneText(dom,rootEle,SESSION_ID, sessionId + "");
+			addOneText(dom,rootEle,TIME_LEFT, timeLeft + "");
 			return Client.serialize(dom);
 		}
 		catch (Exception e) {
@@ -885,9 +1049,9 @@ public class Server implements Runnable {
 			System.out.println("==BEGIN IS==");
 			System.out.write(bytes, 0, size);
 			System.out.println("\n==END IS==");
-		} catch (IOException e2) {
+		} catch (IOException e) {
 			System.out.println(">>> Inputstream error");
-			e2.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 	

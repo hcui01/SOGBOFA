@@ -10,8 +10,7 @@ package util;
 
 import java.io.Serializable;
 
-public class Pair<K1,K2> implements Comparable, Serializable{
-	
+public class Pair<K1,K2> implements Comparable, Cloneable, Serializable{
 
 	public K1 _o1;
 	public K2 _o2;
