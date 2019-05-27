@@ -1,53 +1,64 @@
+-------------------------------------------------------------------------
 OVERVIEW
 
-This project includes the code for the SOGBOFA stochastic planning algorithm as well as the ARollout stochastic planning algorithm as described in the following papers. See  
-         http://www.cs.tufts.edu/research/ml/index.php?op=pubs
-
-H. Cui and R. Khardon, Online Symbolic Gradient-Based Optimization for Factored Action MDPs, International Joint Conference on Artificial Intelligence (IJCAI), 2016 
-
-H. Cui, R. Khardon, A. Fern, and P. Tadepalli., Factored MCTS for Large Scale Stochastic Planning. , Proceedings of the AAAI Conference on Artificial Intelligence (AAAI), 2015  
-
-SOGBOFA and ARollout use input in the RDDL language and have been implemented by modifying some of the original code of the RDDL simulator
+SOGBOFA is a state-fo-the-art stochastic online planning algorithm that specializes on MDPs that have large state and action spaces. It uses the idea of "Aggregate Simulation" to build a computation graph which symbolically approximates the Q value of actions given the current state, and searches the action space very efficiently using gradient updates. It supports various action constraints defined in first-order predicates. It directly works with MDP domains defined in RDDL, and is implemented based on the original code of the RDDL simulator 
    https://github.com/ssanner/rddlsim
-Since our code integrates into an older version of RDDL we provide the entire code base here.
-
-We provide the planning algorithms code as well as the test domains and challenge problems as used in the IJCAI paper.
-
-
-HOW TO USE THE CODE: SOGBOFA 
-
-1. We recommand using Eclipse IDE to compile and run the code
-
-2. Compile and run Server.java, or directly run Server.jar from download with command
-   java -jar Server.jar Domains 2224 20 1 60 0
-   Arguments
-   Domains: the folder where RDDL files are. The RDDL problems that we test on in the paper are all in the directory. If you are using Server.jar and Client.jar, the instances files are just in the same directory. You may need to change \ to / according to your system.
-   2224:                  port used for communication between Client and Server
-   20:			  rounds to run
-   1:			  random seed
-   60:                    time per step in seconds
-   0:                     This is a parameter used in our experiments. Please set it to 0.
-
-3  Compile and run Client.java, or directly run Client.jar from download with command
-   java -jar Client.jar Domains Localhost RevAccGradient rddl.policy.RevAccGradient 2224 1 academic_advising 60 20 20
-   Domains: the folder where RDDL files are. The RDDL problems that we test on in the paper are all in the directory. If you are using Server.jar and Client.jar, the instances files are just in the same directory. You may need to change \ to / according to your system. Here we use the same directory as in Server.
-   Localhost:             Server host name.
-   RevAccGradient:        Client name
-   rddl.policy.RevAccGradient: You should keep it as it is
-   2224:                  port to communicate with the server, should be the same as used in server
-   1:                     random seed, should be the same as used in server
-   academic_advising: domain name. could be academic_advising, sysadmin, elevators, traffic, tamarisk, skill_teaching, as in our paper
-   60:		          time per step
-   20 20:                 the instance index from 1-20 in the corresponding domain. Please repeat the instance index twice in the argument list.  
    
+   Please cite our paper if you are using the planner as a baseline, and/or star the project if you like it ^_^
 
-This will run the SOGBOFA client 20 times on the corresponding instance from the specified domain. The RDDL simulator outputs the sequence of steps and rewards that can be collected to obtain the results in the paper.
+-------------------------------------------------------------------------
+NEWS
 
-HOW TO USE THE CODE: ARollout
+* We fix the bugs and add supports to more action constraints. For more details, see our most recent ICAPS 2019 paper
+   http://homes.sice.indiana.edu/rkhardon/PUB/icaps2019-LCsogbofa.pdf
+  We are able to outperform the winner of IPC2018/2014/2011 with a large margin
 
-The only modification needed is to change the arguments to the client program as follows:
- java -jar Client.jar Domains Localhost ARollout rddl.policy.NYYR11 2224 1 academic_advising 60 20 20
+* The latest version of SOGBOFA with the new extention of "lifting" and "conformant" is the runner-up of the most recent IPC2018 competition. For more information, see the competition web page 
+   https://ipc2018-probabilistic.bitbucket.io/ 
+  Note that since SOGBOFA did not fully support all the competition constraints by then, it crashed on quite some problems.
 
+-------------------------------------------------------------------------
+RELATED PAPERS
 
-HOW TO USE THE CODE: new domains and/or instances
-You can run any RDDL instances with specified directory and name. However so far we only support RDDL, not RDDL2, which is a later version than the simulator we work with.
+* H. Cui, T. Keller and R. Khardon, Stochastic Planning with Lifted Symbolic Trajectory Optimization, Proceedings of the International Conference on Automated Planning and Scheduling (ICAPS), 2019.
+
+* H. Cui and R. Khardon, Lifted Stochastic Planning, Belief Propagation and Marginal MAP, The AAAI-18 Workshop on Planning and Inference, held with the AAAI Conference on Artificial Intelligence (AAAI), 2018
+
+* H. Cui and R. Khardon, Online Symbolic Gradient-Based Optimization for Factored Action MDPs, International Joint Conference on Artificial Intelligence (IJCAI), 2016 
+
+* H. Cui, R. Khardon, A. Fern, and P. Tadepalli., Factored MCTS for Large Scale Stochastic Planning. , Proceedings of the AAAI Conference on Artificial Intelligence (AAAI), 201
+
+You can easily find any paper of your interest at Hao Cui's personal page
+   https://sites.google.com/view/hao-cui/home
+   
+-------------------------------------------------------------------------
+HOW TO USE
+
+* Prerequisites: Java SE 1.8 or higher
+* Run the server
+  One can either run the server from RDDLSim Project, or compile and run the Server.java included in our source code with the following arguments
+  rddlfilename-or-dir portnumber num-rounds random-seed timeout 
+  example:
+  /instances 2323 100 1 10000
+* Run SOGBOFA
+  compile and run the SOGBOFA.java included in our source code with the following arguments
+  instance-name portnumber
+  example:
+  traffic_inst_mdp__10 2323
+* Results
+  After finishing the requested number of runs, the server will record 6 files, with the following names
+  L_C_SOGBOFA_timeout_isntance-name_Score
+  L_C_SOGBOFA_timeout_isntance-name_depthCounter
+  L_C_SOGBOFA_timeout_isntance-name_sizeCounter
+  L_C_SOGBOFA_timeout_isntance-name_rrCounter
+  L_C_SOGBOFA_timeout_isntance-name_seenCounter
+  L_C_SOGBOFA_timeout_isntance-name_updatesCounter
+  which record respectively the average score of the runs, the average depth of the search, the average size of the computation graph, the average number of radnom restarts, the average number of action evaluated, the average number of gradient updates.
+  The Score file has three numbers, respectively the instance index, the average cumulative reward, and the standard deviation. The other files only has one number inside.
+  
+-------------------------------------------------------------------------
+OTHER WORK
+
+Checkout the other project that uses the similar idea of "Aggregate Simulation", but work on Bayesian Inference. 
+  Link: Under Construction
+
