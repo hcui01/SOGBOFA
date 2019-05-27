@@ -1,0 +1,1045 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+//                                                                             //
+// RDDL MDP version of Earth Observation instance #19 for IPC 2018 by Thomas   //
+// Keller (tho.keller [at] unibas.ch), based on a domain that was created for  //
+// the paper "An Experimental Comparison of Classical, FOND and Probabilistic  //
+// Planning" by Andreas Hertle, Christian Dornhege, Thomas Keller, Robert      //
+// Mattmüller, Manuela Ortlieb, and Bernhard Nebel (KI 2014).                  //
+//                                                                             //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+instance earth-observation_inst_mdp__19 {
+    domain = earth-observation_mdp;
+
+    objects {
+        patch : { p0101, p0102, p0103, p0104, p0105, p0106, p0107, p0108, p0109, p0110, p0111, p0112, p0113, p0114, p0115, p0116,
+                  p0201, p0202, p0203, p0204, p0205, p0206, p0207, p0208, p0209, p0210, p0211, p0212, p0213, p0214, p0215, p0216,
+                  p0301, p0302, p0303, p0304, p0305, p0306, p0307, p0308, p0309, p0310, p0311, p0312, p0313, p0314, p0315, p0316,
+                  p0401, p0402, p0403, p0404, p0405, p0406, p0407, p0408, p0409, p0410, p0411, p0412, p0413, p0414, p0415, p0416,
+                  p0501, p0502, p0503, p0504, p0505, p0506, p0507, p0508, p0509, p0510, p0511, p0512, p0513, p0514, p0515, p0516,
+                  p0601, p0602, p0603, p0604, p0605, p0606, p0607, p0608, p0609, p0610, p0611, p0612, p0613, p0614, p0615, p0616,
+                  p0701, p0702, p0703, p0704, p0705, p0706, p0707, p0708, p0709, p0710, p0711, p0712, p0713, p0714, p0715, p0716,
+                  p0801, p0802, p0803, p0804, p0805, p0806, p0807, p0808, p0809, p0810, p0811, p0812, p0813, p0814, p0815, p0816,
+                  p0901, p0902, p0903, p0904, p0905, p0906, p0907, p0908, p0909, p0910, p0911, p0912, p0913, p0914, p0915, p0916,
+                  p1001, p1002, p1003, p1004, p1005, p1006, p1007, p1008, p1009, p1010, p1011, p1012, p1013, p1014, p1015, p1016,
+                  p1101, p1102, p1103, p1104, p1105, p1106, p1107, p1108, p1109, p1110, p1111, p1112, p1113, p1114, p1115, p1116,
+                  p1201, p1202, p1203, p1204, p1205, p1206, p1207, p1208, p1209, p1210, p1211, p1212, p1213, p1214, p1215, p1216 };
+    };
+
+    non-fluents {
+        FAILURE_PROB_HIGH_VIS = 0.117466;
+        FAILURE_PROB_MEDIUM_VIS = 0.652072;
+        FAILURE_PROB_LOW_VIS = 0.857302;
+
+        HIGH_TO_MEDIUM_VIS = 0.400115;
+        HIGH_TO_LOW_VIS = 0.186037;
+
+        MEDIUM_TO_HIGH_VIS = 0.375462;
+        MEDIUM_TO_LOW_VIS = 0.382719;
+
+        LOW_TO_MEDIUM_VIS = 0.417940;
+        LOW_TO_HIGH_VIS = 0.244065;
+
+        CONNECTED_north-east(p0101, p0202);
+        CONNECTED_east(p0101, p0201);
+
+        CONNECTED_north-east(p0102, p0203);
+        CONNECTED_east(p0102, p0202);
+        CONNECTED_south-east(p0102, p0201);
+
+        CONNECTED_north-east(p0103, p0204);
+        CONNECTED_east(p0103, p0203);
+        CONNECTED_south-east(p0103, p0202);
+
+        CONNECTED_north-east(p0104, p0205);
+        CONNECTED_east(p0104, p0204);
+        CONNECTED_south-east(p0104, p0203);
+
+        CONNECTED_north-east(p0105, p0206);
+        CONNECTED_east(p0105, p0205);
+        CONNECTED_south-east(p0105, p0204);
+
+        CONNECTED_north-east(p0106, p0207);
+        CONNECTED_east(p0106, p0206);
+        CONNECTED_south-east(p0106, p0205);
+
+        CONNECTED_north-east(p0107, p0208);
+        CONNECTED_east(p0107, p0207);
+        CONNECTED_south-east(p0107, p0206);
+
+        CONNECTED_north-east(p0108, p0209);
+        CONNECTED_east(p0108, p0208);
+        CONNECTED_south-east(p0108, p0207);
+
+        CONNECTED_north-east(p0109, p0210);
+        CONNECTED_east(p0109, p0209);
+        CONNECTED_south-east(p0109, p0208);
+
+        CONNECTED_north-east(p0110, p0211);
+        CONNECTED_east(p0110, p0210);
+        CONNECTED_south-east(p0110, p0209);
+
+        CONNECTED_north-east(p0111, p0212);
+        CONNECTED_east(p0111, p0211);
+        CONNECTED_south-east(p0111, p0210);
+
+        CONNECTED_north-east(p0112, p0213);
+        CONNECTED_east(p0112, p0212);
+        CONNECTED_south-east(p0112, p0211);
+
+        CONNECTED_north-east(p0113, p0214);
+        CONNECTED_east(p0113, p0213);
+        CONNECTED_south-east(p0113, p0212);
+
+        CONNECTED_north-east(p0114, p0215);
+        CONNECTED_east(p0114, p0214);
+        CONNECTED_south-east(p0114, p0213);
+
+        CONNECTED_north-east(p0115, p0216);
+        CONNECTED_east(p0115, p0215);
+        CONNECTED_south-east(p0115, p0214);
+
+        CONNECTED_east(p0116, p0216);
+        CONNECTED_south-east(p0116, p0215);
+
+        CONNECTED_north-east(p0201, p0302);
+        CONNECTED_east(p0201, p0301);
+
+        CONNECTED_north-east(p0202, p0303);
+        CONNECTED_east(p0202, p0302);
+        CONNECTED_south-east(p0202, p0301);
+
+        CONNECTED_north-east(p0203, p0304);
+        CONNECTED_east(p0203, p0303);
+        CONNECTED_south-east(p0203, p0302);
+
+        CONNECTED_north-east(p0204, p0305);
+        CONNECTED_east(p0204, p0304);
+        CONNECTED_south-east(p0204, p0303);
+
+        CONNECTED_north-east(p0205, p0306);
+        CONNECTED_east(p0205, p0305);
+        CONNECTED_south-east(p0205, p0304);
+
+        CONNECTED_north-east(p0206, p0307);
+        CONNECTED_east(p0206, p0306);
+        CONNECTED_south-east(p0206, p0305);
+
+        CONNECTED_north-east(p0207, p0308);
+        CONNECTED_east(p0207, p0307);
+        CONNECTED_south-east(p0207, p0306);
+
+        CONNECTED_north-east(p0208, p0309);
+        CONNECTED_east(p0208, p0308);
+        CONNECTED_south-east(p0208, p0307);
+
+        CONNECTED_north-east(p0209, p0310);
+        CONNECTED_east(p0209, p0309);
+        CONNECTED_south-east(p0209, p0308);
+
+        CONNECTED_north-east(p0210, p0311);
+        CONNECTED_east(p0210, p0310);
+        CONNECTED_south-east(p0210, p0309);
+
+        CONNECTED_north-east(p0211, p0312);
+        CONNECTED_east(p0211, p0311);
+        CONNECTED_south-east(p0211, p0310);
+
+        CONNECTED_north-east(p0212, p0313);
+        CONNECTED_east(p0212, p0312);
+        CONNECTED_south-east(p0212, p0311);
+
+        CONNECTED_north-east(p0213, p0314);
+        CONNECTED_east(p0213, p0313);
+        CONNECTED_south-east(p0213, p0312);
+
+        CONNECTED_north-east(p0214, p0315);
+        CONNECTED_east(p0214, p0314);
+        CONNECTED_south-east(p0214, p0313);
+
+        CONNECTED_north-east(p0215, p0316);
+        CONNECTED_east(p0215, p0315);
+        CONNECTED_south-east(p0215, p0314);
+
+        CONNECTED_east(p0216, p0316);
+        CONNECTED_south-east(p0216, p0315);
+
+        CONNECTED_north-east(p0301, p0402);
+        CONNECTED_east(p0301, p0401);
+
+        CONNECTED_north-east(p0302, p0403);
+        CONNECTED_east(p0302, p0402);
+        CONNECTED_south-east(p0302, p0401);
+
+        CONNECTED_north-east(p0303, p0404);
+        CONNECTED_east(p0303, p0403);
+        CONNECTED_south-east(p0303, p0402);
+
+        CONNECTED_north-east(p0304, p0405);
+        CONNECTED_east(p0304, p0404);
+        CONNECTED_south-east(p0304, p0403);
+
+        CONNECTED_north-east(p0305, p0406);
+        CONNECTED_east(p0305, p0405);
+        CONNECTED_south-east(p0305, p0404);
+
+        CONNECTED_north-east(p0306, p0407);
+        CONNECTED_east(p0306, p0406);
+        CONNECTED_south-east(p0306, p0405);
+
+        CONNECTED_north-east(p0307, p0408);
+        CONNECTED_east(p0307, p0407);
+        CONNECTED_south-east(p0307, p0406);
+
+        CONNECTED_north-east(p0308, p0409);
+        CONNECTED_east(p0308, p0408);
+        CONNECTED_south-east(p0308, p0407);
+
+        CONNECTED_north-east(p0309, p0410);
+        CONNECTED_east(p0309, p0409);
+        CONNECTED_south-east(p0309, p0408);
+
+        CONNECTED_north-east(p0310, p0411);
+        CONNECTED_east(p0310, p0410);
+        CONNECTED_south-east(p0310, p0409);
+
+        CONNECTED_north-east(p0311, p0412);
+        CONNECTED_east(p0311, p0411);
+        CONNECTED_south-east(p0311, p0410);
+
+        CONNECTED_north-east(p0312, p0413);
+        CONNECTED_east(p0312, p0412);
+        CONNECTED_south-east(p0312, p0411);
+
+        CONNECTED_north-east(p0313, p0414);
+        CONNECTED_east(p0313, p0413);
+        CONNECTED_south-east(p0313, p0412);
+
+        CONNECTED_north-east(p0314, p0415);
+        CONNECTED_east(p0314, p0414);
+        CONNECTED_south-east(p0314, p0413);
+
+        CONNECTED_north-east(p0315, p0416);
+        CONNECTED_east(p0315, p0415);
+        CONNECTED_south-east(p0315, p0414);
+
+        CONNECTED_east(p0316, p0416);
+        CONNECTED_south-east(p0316, p0415);
+
+        CONNECTED_north-east(p0401, p0502);
+        CONNECTED_east(p0401, p0501);
+
+        CONNECTED_north-east(p0402, p0503);
+        CONNECTED_east(p0402, p0502);
+        CONNECTED_south-east(p0402, p0501);
+
+        CONNECTED_north-east(p0403, p0504);
+        CONNECTED_east(p0403, p0503);
+        CONNECTED_south-east(p0403, p0502);
+
+        CONNECTED_north-east(p0404, p0505);
+        CONNECTED_east(p0404, p0504);
+        CONNECTED_south-east(p0404, p0503);
+
+        CONNECTED_north-east(p0405, p0506);
+        CONNECTED_east(p0405, p0505);
+        CONNECTED_south-east(p0405, p0504);
+
+        CONNECTED_north-east(p0406, p0507);
+        CONNECTED_east(p0406, p0506);
+        CONNECTED_south-east(p0406, p0505);
+
+        CONNECTED_north-east(p0407, p0508);
+        CONNECTED_east(p0407, p0507);
+        CONNECTED_south-east(p0407, p0506);
+
+        CONNECTED_north-east(p0408, p0509);
+        CONNECTED_east(p0408, p0508);
+        CONNECTED_south-east(p0408, p0507);
+
+        CONNECTED_north-east(p0409, p0510);
+        CONNECTED_east(p0409, p0509);
+        CONNECTED_south-east(p0409, p0508);
+
+        CONNECTED_north-east(p0410, p0511);
+        CONNECTED_east(p0410, p0510);
+        CONNECTED_south-east(p0410, p0509);
+
+        CONNECTED_north-east(p0411, p0512);
+        CONNECTED_east(p0411, p0511);
+        CONNECTED_south-east(p0411, p0510);
+
+        CONNECTED_north-east(p0412, p0513);
+        CONNECTED_east(p0412, p0512);
+        CONNECTED_south-east(p0412, p0511);
+
+        CONNECTED_north-east(p0413, p0514);
+        CONNECTED_east(p0413, p0513);
+        CONNECTED_south-east(p0413, p0512);
+
+        CONNECTED_north-east(p0414, p0515);
+        CONNECTED_east(p0414, p0514);
+        CONNECTED_south-east(p0414, p0513);
+
+        CONNECTED_north-east(p0415, p0516);
+        CONNECTED_east(p0415, p0515);
+        CONNECTED_south-east(p0415, p0514);
+
+        CONNECTED_east(p0416, p0516);
+        CONNECTED_south-east(p0416, p0515);
+
+        CONNECTED_north-east(p0501, p0602);
+        CONNECTED_east(p0501, p0601);
+
+        CONNECTED_north-east(p0502, p0603);
+        CONNECTED_east(p0502, p0602);
+        CONNECTED_south-east(p0502, p0601);
+
+        CONNECTED_north-east(p0503, p0604);
+        CONNECTED_east(p0503, p0603);
+        CONNECTED_south-east(p0503, p0602);
+
+        CONNECTED_north-east(p0504, p0605);
+        CONNECTED_east(p0504, p0604);
+        CONNECTED_south-east(p0504, p0603);
+
+        CONNECTED_north-east(p0505, p0606);
+        CONNECTED_east(p0505, p0605);
+        CONNECTED_south-east(p0505, p0604);
+
+        CONNECTED_north-east(p0506, p0607);
+        CONNECTED_east(p0506, p0606);
+        CONNECTED_south-east(p0506, p0605);
+
+        CONNECTED_north-east(p0507, p0608);
+        CONNECTED_east(p0507, p0607);
+        CONNECTED_south-east(p0507, p0606);
+
+        CONNECTED_north-east(p0508, p0609);
+        CONNECTED_east(p0508, p0608);
+        CONNECTED_south-east(p0508, p0607);
+
+        CONNECTED_north-east(p0509, p0610);
+        CONNECTED_east(p0509, p0609);
+        CONNECTED_south-east(p0509, p0608);
+
+        CONNECTED_north-east(p0510, p0611);
+        CONNECTED_east(p0510, p0610);
+        CONNECTED_south-east(p0510, p0609);
+
+        CONNECTED_north-east(p0511, p0612);
+        CONNECTED_east(p0511, p0611);
+        CONNECTED_south-east(p0511, p0610);
+
+        CONNECTED_north-east(p0512, p0613);
+        CONNECTED_east(p0512, p0612);
+        CONNECTED_south-east(p0512, p0611);
+
+        CONNECTED_north-east(p0513, p0614);
+        CONNECTED_east(p0513, p0613);
+        CONNECTED_south-east(p0513, p0612);
+
+        CONNECTED_north-east(p0514, p0615);
+        CONNECTED_east(p0514, p0614);
+        CONNECTED_south-east(p0514, p0613);
+
+        CONNECTED_north-east(p0515, p0616);
+        CONNECTED_east(p0515, p0615);
+        CONNECTED_south-east(p0515, p0614);
+
+        CONNECTED_east(p0516, p0616);
+        CONNECTED_south-east(p0516, p0615);
+
+        CONNECTED_north-east(p0601, p0702);
+        CONNECTED_east(p0601, p0701);
+
+        CONNECTED_north-east(p0602, p0703);
+        CONNECTED_east(p0602, p0702);
+        CONNECTED_south-east(p0602, p0701);
+
+        CONNECTED_north-east(p0603, p0704);
+        CONNECTED_east(p0603, p0703);
+        CONNECTED_south-east(p0603, p0702);
+
+        CONNECTED_north-east(p0604, p0705);
+        CONNECTED_east(p0604, p0704);
+        CONNECTED_south-east(p0604, p0703);
+
+        CONNECTED_north-east(p0605, p0706);
+        CONNECTED_east(p0605, p0705);
+        CONNECTED_south-east(p0605, p0704);
+
+        CONNECTED_north-east(p0606, p0707);
+        CONNECTED_east(p0606, p0706);
+        CONNECTED_south-east(p0606, p0705);
+
+        CONNECTED_north-east(p0607, p0708);
+        CONNECTED_east(p0607, p0707);
+        CONNECTED_south-east(p0607, p0706);
+
+        CONNECTED_north-east(p0608, p0709);
+        CONNECTED_east(p0608, p0708);
+        CONNECTED_south-east(p0608, p0707);
+
+        CONNECTED_north-east(p0609, p0710);
+        CONNECTED_east(p0609, p0709);
+        CONNECTED_south-east(p0609, p0708);
+
+        CONNECTED_north-east(p0610, p0711);
+        CONNECTED_east(p0610, p0710);
+        CONNECTED_south-east(p0610, p0709);
+
+        CONNECTED_north-east(p0611, p0712);
+        CONNECTED_east(p0611, p0711);
+        CONNECTED_south-east(p0611, p0710);
+
+        CONNECTED_north-east(p0612, p0713);
+        CONNECTED_east(p0612, p0712);
+        CONNECTED_south-east(p0612, p0711);
+
+        CONNECTED_north-east(p0613, p0714);
+        CONNECTED_east(p0613, p0713);
+        CONNECTED_south-east(p0613, p0712);
+
+        CONNECTED_north-east(p0614, p0715);
+        CONNECTED_east(p0614, p0714);
+        CONNECTED_south-east(p0614, p0713);
+
+        CONNECTED_north-east(p0615, p0716);
+        CONNECTED_east(p0615, p0715);
+        CONNECTED_south-east(p0615, p0714);
+
+        CONNECTED_east(p0616, p0716);
+        CONNECTED_south-east(p0616, p0715);
+
+        CONNECTED_north-east(p0701, p0802);
+        CONNECTED_east(p0701, p0801);
+
+        CONNECTED_north-east(p0702, p0803);
+        CONNECTED_east(p0702, p0802);
+        CONNECTED_south-east(p0702, p0801);
+
+        CONNECTED_north-east(p0703, p0804);
+        CONNECTED_east(p0703, p0803);
+        CONNECTED_south-east(p0703, p0802);
+
+        CONNECTED_north-east(p0704, p0805);
+        CONNECTED_east(p0704, p0804);
+        CONNECTED_south-east(p0704, p0803);
+
+        CONNECTED_north-east(p0705, p0806);
+        CONNECTED_east(p0705, p0805);
+        CONNECTED_south-east(p0705, p0804);
+
+        CONNECTED_north-east(p0706, p0807);
+        CONNECTED_east(p0706, p0806);
+        CONNECTED_south-east(p0706, p0805);
+
+        CONNECTED_north-east(p0707, p0808);
+        CONNECTED_east(p0707, p0807);
+        CONNECTED_south-east(p0707, p0806);
+
+        CONNECTED_north-east(p0708, p0809);
+        CONNECTED_east(p0708, p0808);
+        CONNECTED_south-east(p0708, p0807);
+
+        CONNECTED_north-east(p0709, p0810);
+        CONNECTED_east(p0709, p0809);
+        CONNECTED_south-east(p0709, p0808);
+
+        CONNECTED_north-east(p0710, p0811);
+        CONNECTED_east(p0710, p0810);
+        CONNECTED_south-east(p0710, p0809);
+
+        CONNECTED_north-east(p0711, p0812);
+        CONNECTED_east(p0711, p0811);
+        CONNECTED_south-east(p0711, p0810);
+
+        CONNECTED_north-east(p0712, p0813);
+        CONNECTED_east(p0712, p0812);
+        CONNECTED_south-east(p0712, p0811);
+
+        CONNECTED_north-east(p0713, p0814);
+        CONNECTED_east(p0713, p0813);
+        CONNECTED_south-east(p0713, p0812);
+
+        CONNECTED_north-east(p0714, p0815);
+        CONNECTED_east(p0714, p0814);
+        CONNECTED_south-east(p0714, p0813);
+
+        CONNECTED_north-east(p0715, p0816);
+        CONNECTED_east(p0715, p0815);
+        CONNECTED_south-east(p0715, p0814);
+
+        CONNECTED_east(p0716, p0816);
+        CONNECTED_south-east(p0716, p0815);
+
+        CONNECTED_north-east(p0801, p0902);
+        CONNECTED_east(p0801, p0901);
+
+        CONNECTED_north-east(p0802, p0903);
+        CONNECTED_east(p0802, p0902);
+        CONNECTED_south-east(p0802, p0901);
+
+        CONNECTED_north-east(p0803, p0904);
+        CONNECTED_east(p0803, p0903);
+        CONNECTED_south-east(p0803, p0902);
+
+        CONNECTED_north-east(p0804, p0905);
+        CONNECTED_east(p0804, p0904);
+        CONNECTED_south-east(p0804, p0903);
+
+        CONNECTED_north-east(p0805, p0906);
+        CONNECTED_east(p0805, p0905);
+        CONNECTED_south-east(p0805, p0904);
+
+        CONNECTED_north-east(p0806, p0907);
+        CONNECTED_east(p0806, p0906);
+        CONNECTED_south-east(p0806, p0905);
+
+        CONNECTED_north-east(p0807, p0908);
+        CONNECTED_east(p0807, p0907);
+        CONNECTED_south-east(p0807, p0906);
+
+        CONNECTED_north-east(p0808, p0909);
+        CONNECTED_east(p0808, p0908);
+        CONNECTED_south-east(p0808, p0907);
+
+        CONNECTED_north-east(p0809, p0910);
+        CONNECTED_east(p0809, p0909);
+        CONNECTED_south-east(p0809, p0908);
+
+        CONNECTED_north-east(p0810, p0911);
+        CONNECTED_east(p0810, p0910);
+        CONNECTED_south-east(p0810, p0909);
+
+        CONNECTED_north-east(p0811, p0912);
+        CONNECTED_east(p0811, p0911);
+        CONNECTED_south-east(p0811, p0910);
+
+        CONNECTED_north-east(p0812, p0913);
+        CONNECTED_east(p0812, p0912);
+        CONNECTED_south-east(p0812, p0911);
+
+        CONNECTED_north-east(p0813, p0914);
+        CONNECTED_east(p0813, p0913);
+        CONNECTED_south-east(p0813, p0912);
+
+        CONNECTED_north-east(p0814, p0915);
+        CONNECTED_east(p0814, p0914);
+        CONNECTED_south-east(p0814, p0913);
+
+        CONNECTED_north-east(p0815, p0916);
+        CONNECTED_east(p0815, p0915);
+        CONNECTED_south-east(p0815, p0914);
+
+        CONNECTED_east(p0816, p0916);
+        CONNECTED_south-east(p0816, p0915);
+
+        CONNECTED_north-east(p0901, p1002);
+        CONNECTED_east(p0901, p1001);
+
+        CONNECTED_north-east(p0902, p1003);
+        CONNECTED_east(p0902, p1002);
+        CONNECTED_south-east(p0902, p1001);
+
+        CONNECTED_north-east(p0903, p1004);
+        CONNECTED_east(p0903, p1003);
+        CONNECTED_south-east(p0903, p1002);
+
+        CONNECTED_north-east(p0904, p1005);
+        CONNECTED_east(p0904, p1004);
+        CONNECTED_south-east(p0904, p1003);
+
+        CONNECTED_north-east(p0905, p1006);
+        CONNECTED_east(p0905, p1005);
+        CONNECTED_south-east(p0905, p1004);
+
+        CONNECTED_north-east(p0906, p1007);
+        CONNECTED_east(p0906, p1006);
+        CONNECTED_south-east(p0906, p1005);
+
+        CONNECTED_north-east(p0907, p1008);
+        CONNECTED_east(p0907, p1007);
+        CONNECTED_south-east(p0907, p1006);
+
+        CONNECTED_north-east(p0908, p1009);
+        CONNECTED_east(p0908, p1008);
+        CONNECTED_south-east(p0908, p1007);
+
+        CONNECTED_north-east(p0909, p1010);
+        CONNECTED_east(p0909, p1009);
+        CONNECTED_south-east(p0909, p1008);
+
+        CONNECTED_north-east(p0910, p1011);
+        CONNECTED_east(p0910, p1010);
+        CONNECTED_south-east(p0910, p1009);
+
+        CONNECTED_north-east(p0911, p1012);
+        CONNECTED_east(p0911, p1011);
+        CONNECTED_south-east(p0911, p1010);
+
+        CONNECTED_north-east(p0912, p1013);
+        CONNECTED_east(p0912, p1012);
+        CONNECTED_south-east(p0912, p1011);
+
+        CONNECTED_north-east(p0913, p1014);
+        CONNECTED_east(p0913, p1013);
+        CONNECTED_south-east(p0913, p1012);
+
+        CONNECTED_north-east(p0914, p1015);
+        CONNECTED_east(p0914, p1014);
+        CONNECTED_south-east(p0914, p1013);
+
+        CONNECTED_north-east(p0915, p1016);
+        CONNECTED_east(p0915, p1015);
+        CONNECTED_south-east(p0915, p1014);
+
+        CONNECTED_east(p0916, p1016);
+        CONNECTED_south-east(p0916, p1015);
+
+        CONNECTED_north-east(p1001, p1102);
+        CONNECTED_east(p1001, p1101);
+
+        CONNECTED_north-east(p1002, p1103);
+        CONNECTED_east(p1002, p1102);
+        CONNECTED_south-east(p1002, p1101);
+
+        CONNECTED_north-east(p1003, p1104);
+        CONNECTED_east(p1003, p1103);
+        CONNECTED_south-east(p1003, p1102);
+
+        CONNECTED_north-east(p1004, p1105);
+        CONNECTED_east(p1004, p1104);
+        CONNECTED_south-east(p1004, p1103);
+
+        CONNECTED_north-east(p1005, p1106);
+        CONNECTED_east(p1005, p1105);
+        CONNECTED_south-east(p1005, p1104);
+
+        CONNECTED_north-east(p1006, p1107);
+        CONNECTED_east(p1006, p1106);
+        CONNECTED_south-east(p1006, p1105);
+
+        CONNECTED_north-east(p1007, p1108);
+        CONNECTED_east(p1007, p1107);
+        CONNECTED_south-east(p1007, p1106);
+
+        CONNECTED_north-east(p1008, p1109);
+        CONNECTED_east(p1008, p1108);
+        CONNECTED_south-east(p1008, p1107);
+
+        CONNECTED_north-east(p1009, p1110);
+        CONNECTED_east(p1009, p1109);
+        CONNECTED_south-east(p1009, p1108);
+
+        CONNECTED_north-east(p1010, p1111);
+        CONNECTED_east(p1010, p1110);
+        CONNECTED_south-east(p1010, p1109);
+
+        CONNECTED_north-east(p1011, p1112);
+        CONNECTED_east(p1011, p1111);
+        CONNECTED_south-east(p1011, p1110);
+
+        CONNECTED_north-east(p1012, p1113);
+        CONNECTED_east(p1012, p1112);
+        CONNECTED_south-east(p1012, p1111);
+
+        CONNECTED_north-east(p1013, p1114);
+        CONNECTED_east(p1013, p1113);
+        CONNECTED_south-east(p1013, p1112);
+
+        CONNECTED_north-east(p1014, p1115);
+        CONNECTED_east(p1014, p1114);
+        CONNECTED_south-east(p1014, p1113);
+
+        CONNECTED_north-east(p1015, p1116);
+        CONNECTED_east(p1015, p1115);
+        CONNECTED_south-east(p1015, p1114);
+
+        CONNECTED_east(p1016, p1116);
+        CONNECTED_south-east(p1016, p1115);
+
+        CONNECTED_north-east(p1101, p1202);
+        CONNECTED_east(p1101, p1201);
+
+        CONNECTED_north-east(p1102, p1203);
+        CONNECTED_east(p1102, p1202);
+        CONNECTED_south-east(p1102, p1201);
+
+        CONNECTED_north-east(p1103, p1204);
+        CONNECTED_east(p1103, p1203);
+        CONNECTED_south-east(p1103, p1202);
+
+        CONNECTED_north-east(p1104, p1205);
+        CONNECTED_east(p1104, p1204);
+        CONNECTED_south-east(p1104, p1203);
+
+        CONNECTED_north-east(p1105, p1206);
+        CONNECTED_east(p1105, p1205);
+        CONNECTED_south-east(p1105, p1204);
+
+        CONNECTED_north-east(p1106, p1207);
+        CONNECTED_east(p1106, p1206);
+        CONNECTED_south-east(p1106, p1205);
+
+        CONNECTED_north-east(p1107, p1208);
+        CONNECTED_east(p1107, p1207);
+        CONNECTED_south-east(p1107, p1206);
+
+        CONNECTED_north-east(p1108, p1209);
+        CONNECTED_east(p1108, p1208);
+        CONNECTED_south-east(p1108, p1207);
+
+        CONNECTED_north-east(p1109, p1210);
+        CONNECTED_east(p1109, p1209);
+        CONNECTED_south-east(p1109, p1208);
+
+        CONNECTED_north-east(p1110, p1211);
+        CONNECTED_east(p1110, p1210);
+        CONNECTED_south-east(p1110, p1209);
+
+        CONNECTED_north-east(p1111, p1212);
+        CONNECTED_east(p1111, p1211);
+        CONNECTED_south-east(p1111, p1210);
+
+        CONNECTED_north-east(p1112, p1213);
+        CONNECTED_east(p1112, p1212);
+        CONNECTED_south-east(p1112, p1211);
+
+        CONNECTED_north-east(p1113, p1214);
+        CONNECTED_east(p1113, p1213);
+        CONNECTED_south-east(p1113, p1212);
+
+        CONNECTED_north-east(p1114, p1215);
+        CONNECTED_east(p1114, p1214);
+        CONNECTED_south-east(p1114, p1213);
+
+        CONNECTED_north-east(p1115, p1216);
+        CONNECTED_east(p1115, p1215);
+        CONNECTED_south-east(p1115, p1214);
+
+        CONNECTED_east(p1116, p1216);
+        CONNECTED_south-east(p1116, p1215);
+
+        CONNECTED_north-east(p1201, p0102);
+        CONNECTED_east(p1201, p0101);
+
+        CONNECTED_north-east(p1202, p0103);
+        CONNECTED_east(p1202, p0102);
+        CONNECTED_south-east(p1202, p0101);
+
+        CONNECTED_north-east(p1203, p0104);
+        CONNECTED_east(p1203, p0103);
+        CONNECTED_south-east(p1203, p0102);
+
+        CONNECTED_north-east(p1204, p0105);
+        CONNECTED_east(p1204, p0104);
+        CONNECTED_south-east(p1204, p0103);
+
+        CONNECTED_north-east(p1205, p0106);
+        CONNECTED_east(p1205, p0105);
+        CONNECTED_south-east(p1205, p0104);
+
+        CONNECTED_north-east(p1206, p0107);
+        CONNECTED_east(p1206, p0106);
+        CONNECTED_south-east(p1206, p0105);
+
+        CONNECTED_north-east(p1207, p0108);
+        CONNECTED_east(p1207, p0107);
+        CONNECTED_south-east(p1207, p0106);
+
+        CONNECTED_north-east(p1208, p0109);
+        CONNECTED_east(p1208, p0108);
+        CONNECTED_south-east(p1208, p0107);
+
+        CONNECTED_north-east(p1209, p0110);
+        CONNECTED_east(p1209, p0109);
+        CONNECTED_south-east(p1209, p0108);
+
+        CONNECTED_north-east(p1210, p0111);
+        CONNECTED_east(p1210, p0110);
+        CONNECTED_south-east(p1210, p0109);
+
+        CONNECTED_north-east(p1211, p0112);
+        CONNECTED_east(p1211, p0111);
+        CONNECTED_south-east(p1211, p0110);
+
+        CONNECTED_north-east(p1212, p0113);
+        CONNECTED_east(p1212, p0112);
+        CONNECTED_south-east(p1212, p0111);
+
+        CONNECTED_north-east(p1213, p0114);
+        CONNECTED_east(p1213, p0113);
+        CONNECTED_south-east(p1213, p0112);
+
+        CONNECTED_north-east(p1214, p0115);
+        CONNECTED_east(p1214, p0114);
+        CONNECTED_south-east(p1214, p0113);
+
+        CONNECTED_north-east(p1215, p0116);
+        CONNECTED_east(p1215, p0115);
+        CONNECTED_south-east(p1215, p0114);
+
+        CONNECTED_east(p1216, p0116);
+        CONNECTED_south-east(p1216, p0115);
+
+
+    };
+
+    init-state {
+        is-focal-point(p0109);
+        is-target(p0101);
+        visibility_is_low(p0101);
+        ~visibility_is_medium(p0101);
+        is-target(p0102);
+        visibility_is_high(p0102);
+        ~visibility_is_medium(p0102);
+        visibility_is_low(p0103);
+        ~visibility_is_medium(p0103);
+        visibility_is_low(p0104);
+        ~visibility_is_medium(p0104);
+        is-target(p0106);
+        visibility_is_low(p0106);
+        ~visibility_is_medium(p0106);
+        is-target(p0107);
+        visibility_is_low(p0107);
+        ~visibility_is_medium(p0107);
+        is-target(p0111);
+        is-target(p0112);
+        is-target(p0113);
+        is-target(p0114);
+        is-target(p0115);
+        visibility_is_low(p0116);
+        ~visibility_is_medium(p0116);
+        visibility_is_high(p0203);
+        ~visibility_is_medium(p0203);
+        is-target(p0205);
+        visibility_is_low(p0205);
+        ~visibility_is_medium(p0205);
+        is-target(p0206);
+        is-target(p0208);
+        visibility_is_low(p0210);
+        ~visibility_is_medium(p0210);
+        is-target(p0212);
+        visibility_is_low(p0212);
+        ~visibility_is_medium(p0212);
+        is-target(p0215);
+        visibility_is_low(p0302);
+        ~visibility_is_medium(p0302);
+        is-target(p0304);
+        visibility_is_low(p0305);
+        ~visibility_is_medium(p0305);
+        visibility_is_low(p0306);
+        ~visibility_is_medium(p0306);
+        visibility_is_low(p0309);
+        ~visibility_is_medium(p0309);
+        is-target(p0312);
+        is-target(p0313);
+        visibility_is_high(p0313);
+        ~visibility_is_medium(p0313);
+        is-target(p0315);
+        visibility_is_low(p0315);
+        ~visibility_is_medium(p0315);
+        is-target(p0316);
+        is-target(p0401);
+        is-target(p0405);
+        is-target(p0406);
+        visibility_is_low(p0406);
+        ~visibility_is_medium(p0406);
+        is-target(p0407);
+        visibility_is_high(p0408);
+        ~visibility_is_medium(p0408);
+        visibility_is_low(p0409);
+        ~visibility_is_medium(p0409);
+        visibility_is_low(p0410);
+        ~visibility_is_medium(p0410);
+        is-target(p0413);
+        visibility_is_high(p0413);
+        ~visibility_is_medium(p0413);
+        visibility_is_low(p0414);
+        ~visibility_is_medium(p0414);
+        visibility_is_low(p0415);
+        ~visibility_is_medium(p0415);
+        visibility_is_low(p0501);
+        ~visibility_is_medium(p0501);
+        visibility_is_high(p0502);
+        ~visibility_is_medium(p0502);
+        is-target(p0503);
+        visibility_is_high(p0503);
+        ~visibility_is_medium(p0503);
+        visibility_is_high(p0507);
+        ~visibility_is_medium(p0507);
+        is-target(p0508);
+        visibility_is_high(p0508);
+        ~visibility_is_medium(p0508);
+        visibility_is_high(p0510);
+        ~visibility_is_medium(p0510);
+        visibility_is_low(p0512);
+        ~visibility_is_medium(p0512);
+        visibility_is_low(p0516);
+        ~visibility_is_medium(p0516);
+        is-target(p0601);
+        visibility_is_low(p0602);
+        ~visibility_is_medium(p0602);
+        is-target(p0603);
+        visibility_is_high(p0603);
+        ~visibility_is_medium(p0603);
+        is-target(p0604);
+        visibility_is_high(p0604);
+        ~visibility_is_medium(p0604);
+        visibility_is_low(p0605);
+        ~visibility_is_medium(p0605);
+        visibility_is_low(p0608);
+        ~visibility_is_medium(p0608);
+        is-target(p0611);
+        visibility_is_high(p0612);
+        ~visibility_is_medium(p0612);
+        is-target(p0613);
+        visibility_is_low(p0614);
+        ~visibility_is_medium(p0614);
+        is-target(p0615);
+        visibility_is_high(p0701);
+        ~visibility_is_medium(p0701);
+        visibility_is_low(p0703);
+        ~visibility_is_medium(p0703);
+        is-target(p0705);
+        visibility_is_low(p0705);
+        ~visibility_is_medium(p0705);
+        visibility_is_low(p0707);
+        ~visibility_is_medium(p0707);
+        visibility_is_low(p0708);
+        ~visibility_is_medium(p0708);
+        is-target(p0709);
+        visibility_is_low(p0709);
+        ~visibility_is_medium(p0709);
+        visibility_is_low(p0710);
+        ~visibility_is_medium(p0710);
+        visibility_is_low(p0711);
+        ~visibility_is_medium(p0711);
+        visibility_is_high(p0712);
+        ~visibility_is_medium(p0712);
+        is-target(p0713);
+        visibility_is_high(p0714);
+        ~visibility_is_medium(p0714);
+        is-target(p0801);
+        visibility_is_low(p0801);
+        ~visibility_is_medium(p0801);
+        is-target(p0802);
+        visibility_is_low(p0802);
+        ~visibility_is_medium(p0802);
+        visibility_is_low(p0803);
+        ~visibility_is_medium(p0803);
+        visibility_is_low(p0804);
+        ~visibility_is_medium(p0804);
+        visibility_is_low(p0805);
+        ~visibility_is_medium(p0805);
+        is-target(p0806);
+        visibility_is_low(p0810);
+        ~visibility_is_medium(p0810);
+        is-target(p0812);
+        is-target(p0814);
+        visibility_is_low(p0901);
+        ~visibility_is_medium(p0901);
+        is-target(p0902);
+        visibility_is_low(p0905);
+        ~visibility_is_medium(p0905);
+        visibility_is_low(p0906);
+        ~visibility_is_medium(p0906);
+        visibility_is_low(p0907);
+        ~visibility_is_medium(p0907);
+        is-target(p0909);
+        visibility_is_low(p0910);
+        ~visibility_is_medium(p0910);
+        visibility_is_low(p0911);
+        ~visibility_is_medium(p0911);
+        visibility_is_low(p1002);
+        ~visibility_is_medium(p1002);
+        is-target(p1003);
+        visibility_is_low(p1006);
+        ~visibility_is_medium(p1006);
+        is-target(p1008);
+        visibility_is_low(p1008);
+        ~visibility_is_medium(p1008);
+        is-target(p1009);
+        is-target(p1011);
+        visibility_is_low(p1012);
+        ~visibility_is_medium(p1012);
+        visibility_is_low(p1014);
+        ~visibility_is_medium(p1014);
+        is-target(p1015);
+        is-target(p1016);
+        visibility_is_low(p1016);
+        ~visibility_is_medium(p1016);
+        visibility_is_low(p1101);
+        ~visibility_is_medium(p1101);
+        is-target(p1103);
+        visibility_is_low(p1103);
+        ~visibility_is_medium(p1103);
+        visibility_is_low(p1104);
+        ~visibility_is_medium(p1104);
+        is-target(p1105);
+        visibility_is_low(p1106);
+        ~visibility_is_medium(p1106);
+        is-target(p1107);
+        is-target(p1108);
+        visibility_is_low(p1108);
+        ~visibility_is_medium(p1108);
+        is-target(p1109);
+        visibility_is_high(p1109);
+        ~visibility_is_medium(p1109);
+        visibility_is_high(p1110);
+        ~visibility_is_medium(p1110);
+        visibility_is_low(p1112);
+        ~visibility_is_medium(p1112);
+        visibility_is_high(p1113);
+        ~visibility_is_medium(p1113);
+        is-target(p1114);
+        visibility_is_low(p1114);
+        ~visibility_is_medium(p1114);
+        visibility_is_high(p1115);
+        ~visibility_is_medium(p1115);
+        visibility_is_high(p1116);
+        ~visibility_is_medium(p1116);
+        visibility_is_low(p1201);
+        ~visibility_is_medium(p1201);
+        visibility_is_high(p1202);
+        ~visibility_is_medium(p1202);
+        visibility_is_low(p1203);
+        ~visibility_is_medium(p1203);
+        visibility_is_low(p1204);
+        ~visibility_is_medium(p1204);
+        visibility_is_high(p1205);
+        ~visibility_is_medium(p1205);
+        visibility_is_low(p1206);
+        ~visibility_is_medium(p1206);
+        visibility_is_high(p1207);
+        ~visibility_is_medium(p1207);
+        is-target(p1208);
+        visibility_is_high(p1208);
+        ~visibility_is_medium(p1208);
+        is-target(p1210);
+        visibility_is_low(p1210);
+        ~visibility_is_medium(p1210);
+        is-target(p1211);
+        visibility_is_low(p1211);
+        ~visibility_is_medium(p1211);
+        visibility_is_high(p1212);
+        ~visibility_is_medium(p1212);
+        visibility_is_low(p1213);
+        ~visibility_is_medium(p1213);
+        is-target(p1214);
+        visibility_is_low(p1214);
+        ~visibility_is_medium(p1214);
+        visibility_is_low(p1215);
+        ~visibility_is_medium(p1215);
+        is-target(p1216);
+        visibility_is_high(p1216);
+        ~visibility_is_medium(p1216);
+
+    };
+    horizon = 96;
+    discount = 1.0;
+}

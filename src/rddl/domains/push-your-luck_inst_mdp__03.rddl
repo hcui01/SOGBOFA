@@ -1,0 +1,70 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+//                                                                             //
+// RDDL MDP version of Push Your Luck instance #03 for IPC 2018 by Thomas      //
+// Keller (tho.keller [at] unibas.ch).                                         //
+//                                                                             //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+instance push-your-luck_inst_mdp__03 {
+    domain = push-your-luck_mdp;
+
+    objects {
+        die : { d1 };
+    };
+
+    non-fluents {
+        // reward factors are independent from the die value
+        VALUE_1 = 2.0;
+        VALUE_2 = 2.0;
+        VALUE_3 = 2.0;
+        VALUE_4 = 2.0;
+        VALUE_5 = 2.0;
+        VALUE_6 = 2.0;
+        VALUE_7 = 2.0;
+        VALUE_8 = 2.0;
+        VALUE_9 = 2.0;
+        VALUE_10 = 2.0;
+        VALUE_11 = 2.0;
+        VALUE_12 = 2.0;
+        VALUE_13 = 2.0;
+        VALUE_14 = 2.0;
+        VALUE_15 = 2.0;
+        VALUE_16 = 2.0;
+        VALUE_17 = 2.0;
+        VALUE_18 = 2.0;
+        VALUE_19 = 2.0;
+        VALUE_20 = 2.0;
+
+        // fair 20-sided die
+        PROB_1(d1) = 0.05;
+        PROB_2(d1) = 0.05;
+        PROB_3(d1) = 0.05;
+        PROB_4(d1) = 0.05;
+        PROB_5(d1) = 0.05;
+        PROB_6(d1) = 0.05;
+        PROB_7(d1) = 0.05;
+        PROB_8(d1) = 0.05;
+        PROB_9(d1) = 0.05;
+        PROB_10(d1) = 0.05;
+        PROB_11(d1) = 0.05;
+        PROB_12(d1) = 0.05;
+        PROB_13(d1) = 0.05;
+        PROB_14(d1) = 0.05;
+        PROB_15(d1) = 0.05;
+        PROB_16(d1) = 0.05;
+        PROB_17(d1) = 0.05;
+        PROB_18(d1) = 0.05;
+        PROB_19(d1) = 0.05;
+        PROB_20(d1) = 0.05;
+    };
+
+    init-state {
+        ~die-value-seen_1;
+    };
+
+    horizon = 40;
+
+    discount = 1.0;
+}

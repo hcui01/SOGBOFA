@@ -1,0 +1,74 @@
+// GENERATED AUTOMATICALLY
+
+domain wildlife-preserve_01_mdp {
+    types {
+        ranger : object;
+        poacher : object;
+    };
+
+    pvariables {
+        DEFENDER-REWARD_a1 : { non-fluent, real, default = 10.0 };
+        DEFENDER-REWARD_a2 : { non-fluent, real, default = 10.0 };
+        DEFENDER-REWARD_a3 : { non-fluent, real, default = 10.0 };
+        DEFENDER-REWARD_a4 : { non-fluent, real, default = 10.0 };
+        DEFENDER-PENALTY_a1 : { non-fluent, real, default = -10.0 };
+        DEFENDER-PENALTY_a2 : { non-fluent, real, default = -10.0 };
+        DEFENDER-PENALTY_a3 : { non-fluent, real, default = -10.0 };
+        DEFENDER-PENALTY_a4 : { non-fluent, real, default = -10.0 };
+        ATTACK-WEIGHT_0_a1(poacher) : { non-fluent, real, default = 0.0 };
+        ATTACK-WEIGHT_0_a2(poacher) : { non-fluent, real, default = 0.0 };
+        ATTACK-WEIGHT_0_a3(poacher) : { non-fluent, real, default = 0.0 };
+        ATTACK-WEIGHT_0_a4(poacher) : { non-fluent, real, default = 0.0 };
+        ATTACK-WEIGHT_1_a1(poacher) : { non-fluent, real, default = 0.0 };
+        ATTACK-WEIGHT_1_a2(poacher) : { non-fluent, real, default = 0.0 };
+        ATTACK-WEIGHT_1_a3(poacher) : { non-fluent, real, default = 0.0 };
+        ATTACK-WEIGHT_1_a4(poacher) : { non-fluent, real, default = 0.0 };
+        POACHER-REMEMBERS_1(poacher) : { non-fluent, bool, default = false };
+
+        poacher-attacks_is_a1(poacher) : { interm-fluent, bool, level = 1 };
+        poacher-attacks_is_a2(poacher) : { interm-fluent, bool, level = 2 };
+        poacher-attacks_is_a3(poacher) : { interm-fluent, bool, level = 3 };
+        poacher-attacks_is_a4(poacher) : { interm-fluent, bool, level = 4 };
+
+        was-defended_1_a1 : { state-fluent, bool, default = false };
+        was-defended_1_a2 : { state-fluent, bool, default = false };
+        was-defended_1_a3 : { state-fluent, bool, default = false };
+        was-defended_1_a4 : { state-fluent, bool, default = false };
+        poacher-caught(poacher) : { state-fluent, bool, default = false };
+
+        defend_a1(ranger) : { action-fluent, bool, default = false };
+        defend_a2(ranger) : { action-fluent, bool, default = false };
+        defend_a3(ranger) : { action-fluent, bool, default = false };
+        defend_a4(ranger) : { action-fluent, bool, default = false };
+    };
+
+    cpfs {
+        poacher-attacks_is_a1(?p) = Bernoulli ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) );
+
+        poacher-attacks_is_a2(?p) = ~poacher-attacks_is_a1( ?p ) & Bernoulli ( ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) ) / ( 1.0 - ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) ) ) );
+
+        poacher-attacks_is_a3(?p) = ~poacher-attacks_is_a1( ?p ) & ~poacher-attacks_is_a2( ?p ) & Bernoulli ( ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) ) / ( 1.0 - ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) ) - ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) ) ) );
+
+        poacher-attacks_is_a4(?p) = ~poacher-attacks_is_a1( ?p ) & ~poacher-attacks_is_a2( ?p ) & ~poacher-attacks_is_a3( ?p ) & Bernoulli ( ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) ) / ( 1.0 - ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) ) - ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) ) - ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) / ( ( ( ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a1( ?p ) ) + ( ( ( ( ( was-defended_1_a1 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a1( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a2( ?p ) ) + ( ( ( ( ( was-defended_1_a2 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a2( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a3( ?p ) ) + ( ( ( ( ( was-defended_1_a3 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a3( ?p ) ) ) ) + ( ( ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 0 ) * ATTACK-WEIGHT_0_a4( ?p ) ) + ( ( ( ( ( was-defended_1_a4 & POACHER-REMEMBERS_1( ?p ) ) ) ) == 1 ) * ATTACK-WEIGHT_1_a4( ?p ) ) ) ) ) ) ) );
+
+
+        was-defended_1_a1' = exists_{ ?r : ranger } [ defend_a1( ?r ) ];
+
+        was-defended_1_a2' = exists_{ ?r : ranger } [ defend_a2( ?r ) ];
+
+        was-defended_1_a3' = exists_{ ?r : ranger } [ defend_a3( ?r ) ];
+
+        was-defended_1_a4' = exists_{ ?r : ranger } [ defend_a4( ?r ) ];
+
+        poacher-caught'(?p) = exists_{ ?r : ranger } [ ( ( ( poacher-attacks_is_a1( ?p ) ) & defend_a1( ?r ) ) | ( ( poacher-attacks_is_a2( ?p ) ) & defend_a2( ?r ) ) | ( ( poacher-attacks_is_a3( ?p ) ) & defend_a3( ?r ) ) | ( ( poacher-attacks_is_a4( ?p ) ) & defend_a4( ?r ) ) ) ];
+
+    };
+
+    reward = ( ( if ( ~( exists_{ ?p : poacher } [ ( poacher-attacks_is_a1( ?p ) ) & ~poacher-caught( ?p ) ] ) | ( exists_{ ?r : ranger } [ defend_a1( ?r ) ] ) ) then DEFENDER-REWARD_a1 else DEFENDER-PENALTY_a1 ) + ( if ( ~( exists_{ ?p : poacher } [ ( poacher-attacks_is_a2( ?p ) ) & ~poacher-caught( ?p ) ] ) | ( exists_{ ?r : ranger } [ defend_a2( ?r ) ] ) ) then DEFENDER-REWARD_a2 else DEFENDER-PENALTY_a2 ) + ( if ( ~( exists_{ ?p : poacher } [ ( poacher-attacks_is_a3( ?p ) ) & ~poacher-caught( ?p ) ] ) | ( exists_{ ?r : ranger } [ defend_a3( ?r ) ] ) ) then DEFENDER-REWARD_a3 else DEFENDER-PENALTY_a3 ) + ( if ( ~( exists_{ ?p : poacher } [ ( poacher-attacks_is_a4( ?p ) ) & ~poacher-caught( ?p ) ] ) | ( exists_{ ?r : ranger } [ defend_a4( ?r ) ] ) ) then DEFENDER-REWARD_a4 else DEFENDER-PENALTY_a4 ) ) ;
+
+    action-preconditions {
+        forall_{ ?r : ranger } [ ( ( ( defend_a1( ?r ) ) + ( defend_a2( ?r ) ) + ( defend_a3( ?r ) ) + ( defend_a4( ?r ) ) ) ) == 1 ] ;
+
+    };
+
+}

@@ -1,0 +1,80 @@
+instance tamarisk_inst_mdp__14 {
+	domain = tamarisk_mdp;
+	objects {
+		slot : {s1s1, s1s2, s1s3, s2s1, s2s2, s2s3, s3s1, s3s2, s3s3, s4s1, s4s2, s4s3, s5s1, s5s2, s5s3, s6s1, s6s2, s6s3, s7s1, s7s2, s7s3, s8s1, s8s2, s8s3, s9s1, s9s2, s9s3, s10s1, s10s2, s10s3, s11s1, s11s2, s11s3, s12s1, s12s2, s12s3, s13s1, s13s2, s13s3, s14s1, s14s2, s14s3};
+		reach : {r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14};
+	};
+
+	non-fluents {
+		SLOT-AT-REACH(s1s1,r1);
+		SLOT-AT-REACH(s1s2,r1);
+		SLOT-AT-REACH(s1s3,r1);
+		DOWNSTREAM-REACH(r2,r1);
+		SLOT-AT-REACH(s2s1,r2);
+		SLOT-AT-REACH(s2s2,r2);
+		SLOT-AT-REACH(s2s3,r2);
+		DOWNSTREAM-REACH(r3,r2);
+		SLOT-AT-REACH(s3s1,r3);
+		SLOT-AT-REACH(s3s2,r3);
+		SLOT-AT-REACH(s3s3,r3);
+		DOWNSTREAM-REACH(r4,r3);
+		SLOT-AT-REACH(s4s1,r4);
+		SLOT-AT-REACH(s4s2,r4);
+		SLOT-AT-REACH(s4s3,r4);
+		DOWNSTREAM-REACH(r5,r4);
+		SLOT-AT-REACH(s5s1,r5);
+		SLOT-AT-REACH(s5s2,r5);
+		SLOT-AT-REACH(s5s3,r5);
+		DOWNSTREAM-REACH(r6,r5);
+		SLOT-AT-REACH(s6s1,r6);
+		SLOT-AT-REACH(s6s2,r6);
+		SLOT-AT-REACH(s6s3,r6);
+		DOWNSTREAM-REACH(r7,r6);
+		SLOT-AT-REACH(s7s1,r7);
+		SLOT-AT-REACH(s7s2,r7);
+		SLOT-AT-REACH(s7s3,r7);
+		DOWNSTREAM-REACH(r8,r7);
+		SLOT-AT-REACH(s8s1,r8);
+		SLOT-AT-REACH(s8s2,r8);
+		SLOT-AT-REACH(s8s3,r8);
+		DOWNSTREAM-REACH(r9,r8);
+		SLOT-AT-REACH(s9s1,r9);
+		SLOT-AT-REACH(s9s2,r9);
+		SLOT-AT-REACH(s9s3,r9);
+		DOWNSTREAM-REACH(r10,r9);
+		SLOT-AT-REACH(s10s1,r10);
+		SLOT-AT-REACH(s10s2,r10);
+		SLOT-AT-REACH(s10s3,r10);
+		DOWNSTREAM-REACH(r11,r10);
+		SLOT-AT-REACH(s11s1,r11);
+		SLOT-AT-REACH(s11s2,r11);
+		SLOT-AT-REACH(s11s3,r11);
+		DOWNSTREAM-REACH(r12,r11);
+		SLOT-AT-REACH(s12s1,r12);
+		SLOT-AT-REACH(s12s2,r12);
+		SLOT-AT-REACH(s12s3,r12);
+		DOWNSTREAM-REACH(r13,r12);
+		SLOT-AT-REACH(s13s1,r13);
+		SLOT-AT-REACH(s13s2,r13);
+		SLOT-AT-REACH(s13s3,r13);
+		DOWNSTREAM-REACH(r14,r13);
+		SLOT-AT-REACH(s14s1,r14);
+		SLOT-AT-REACH(s14s2,r14);
+		SLOT-AT-REACH(s14s3,r14);
+	};
+	init-state {
+		tamarisk-at(s1s1);
+		native-at(s3s2);
+		native-at(s3s3);
+		native-at(s4s1);
+		tamarisk-at(s4s1);
+		native-at(s4s2);
+		native-at(s5s1);
+		native-at(s6s3);
+		native-at(s8s1);
+		tamarisk-at(s9s2);
+	};
+	horizon  = 40;
+	discount = 1.0;
+}
+

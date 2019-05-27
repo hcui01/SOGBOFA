@@ -1,0 +1,92 @@
+////////////////////////////////////////////////////////////////////
+//
+// Crossing Traffic Robot Navigation
+//
+// Author: Sungwook Yoon (sungwook.yoon [at] gmail.com)
+//
+// Modified for competition and translation purposes by Scott Sanner.
+//
+// In a grid, a robot (R) must get to a goal (G) and avoid obstacles (O)
+// arriving randomly and moving left.  If an obstacle overlaps with the
+// robot, the robot disappears and can no longer move around.  The robot
+// can "duck" underneath a car by deliberately moving right/east when
+// a car is to the right of it (this can make the solution interesting...
+// the robot should start at the left side of the screen then).  The robot
+// receives -1 for every time step it has not reached the goal.  The goal
+// state is absorbing with 0 reward.
+//
+// ****************
+// *            R * 
+// *  <-O <-O <-O *
+// *    <-O   <-O *
+// * <-O    <-O   *
+// *     <-O  <-O *
+// *            G *
+// ****************
+//
+// You can think of this as the RDDL version of Frogger:
+//
+//   http://en.wikipedia.org/wiki/Frogger
+//
+////////////////////////////////////////////////////////////////////
+
+domain tiger_pomdp {
+	requirements = {
+		reward-deterministic,
+//		constrained-state,
+		partially-observed
+	};
+	
+
+	
+	pvariables {
+
+		RIGHT-PROB : {non-fluent, real, default = 0.85};
+		WRONG-PROB : {non-fluent, real, default = 0.15};
+		UNIV-PROB : {non-fluent, real, default = 0.5}; 
+
+		// Fluents
+		left    : {state-fluent, bool, default = false};
+				
+		// Observations
+		at-left : { observ-fluent, bool };
+
+		// Actions
+		listen : {action-fluent, bool, default = false};
+		open-left : {action-fluent, bool, default = false};
+		open-right : {action-fluent, bool, default = false};
+
+	};
+	
+	cpfs {
+	
+		left' = if (left)
+				then KronDelta( true )
+			  else
+				KronDelta( false );
+					
+		at-left =
+
+			if ( listen ^ left)
+				then Bernoulli( RIGHT-PROB )
+			else if (listen ^ ~left)
+				then Bernoulli( WRONG-PROB )
+			else
+				Bernoulli( UNIV-PROB );
+		
+	};
+	
+	// 0 reward for reaching goal, -1 in all other cases
+	reward = (if ((left ^ open-left) | (~left ^ open-right))
+			then 100
+		   else if ((left ^ open-right) | (~left ^ open-left))
+			then -100
+		   else if (listen)
+			then -10
+		   else 0);
+	
+	action-preconditions {
+        listen + open-left + open-right <= 1;
+    };
+	
+}

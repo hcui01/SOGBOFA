@@ -1,0 +1,119 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+//                                                                             //
+// RDDL MDP version of Push Your Luck instance #20 for IPC 2018 by Thomas      //
+// Keller (tho.keller [at] unibas.ch).                                         //
+//                                                                             //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+instance push-your-luck_inst_mdp__20 {
+    domain = push-your-luck_mdp;
+
+    objects {
+        die : { d1, d2, d3, d4, d5 };
+    };
+
+    non-fluents {
+        // reward factor between 0.5 and 2.0, each factor comes up 5 times
+        VALUE_1 = 0.5;
+        VALUE_2 = 1.0;
+        VALUE_3 = 1.5;
+        VALUE_4 = 2.0;
+        VALUE_5 = 0.5;
+        VALUE_6 = 1.0;
+        VALUE_7 = 1.5;
+        VALUE_8 = 2.0;
+        VALUE_9 = 0.5;
+        VALUE_10 = 1.0;
+        VALUE_11 = 1.5;
+        VALUE_12 = 2.0;
+        VALUE_13 = 0.5;
+        VALUE_14 = 1.0;
+        VALUE_15 = 1.5;
+        VALUE_16 = 2.0;
+        VALUE_17 = 0.5;
+        VALUE_18 = 1.0;
+        VALUE_19 = 1.5;
+        VALUE_20 = 2.0;
+
+        // unfair 10-sided die with random probabilities (with
+        // more faces with reward factor of 0.5 or 1.0)
+        PROB_1(d1) = 0.12;
+        PROB_2(d1) = 0.11;
+        PROB_4(d1) = 0.12;
+        PROB_6(d1) = 0.05;
+        PROB_8(d1) = 0.1;
+        PROB_10(d1) = 0.08;
+        PROB_13(d1) = 0.07;
+        PROB_14(d1) = 0.19;
+        PROB_16(d1) = 0.05;
+        PROB_20(d1) = 0.11;
+
+        // unfair 10-sided die with random probabilities (with
+        // more faces with reward factor of 0.5 or 1.0)
+        PROB_1(d2) = 0.02;
+        PROB_3(d2) = 0.03;
+        PROB_5(d2) = 0.04;
+        PROB_8(d2) = 0.05;
+        PROB_9(d2) = 0.25;
+        PROB_11(d2) = 0.14;
+        PROB_14(d2) = 0.13;
+        PROB_16(d2) = 0.06;
+        PROB_18(d2) = 0.20;
+        PROB_19(d2) = 0.08;
+
+        // unfair 20-sided die with random probabilities
+        PROB_1(d3) = 0.08;
+        PROB_2(d3) = 0.01;
+        PROB_3(d3) = 0.06;
+        PROB_4(d3) = 0.17;
+        PROB_5(d3) = 0.03;
+        PROB_6(d3) = 0.07;
+        PROB_7(d3) = 0.12;
+        PROB_8(d3) = 0.09;
+        PROB_9(d3) = 0.04;
+        PROB_10(d3) = 0.02;
+        PROB_11(d3) = 0.02;
+        PROB_12(d3) = 0.05;
+        PROB_13(d3) = 0.01;
+        PROB_14(d3) = 0.06;
+        PROB_15(d3) = 0.04;
+        PROB_16(d3) = 0.01;
+        PROB_17(d3) = 0.04;
+        PROB_18(d3) = 0.02;
+        PROB_19(d3) = 0.02;
+        PROB_20(d3) = 0.04;
+
+        // unfair 10-sided die with random probabilities and
+        // random faces
+        PROB_1(d4) = 0.15;
+        PROB_3(d4) = 0.01;
+        PROB_5(d4) = 0.08;
+        PROB_6(d4) = 0.12;
+        PROB_8(d4) = 0.07;
+        PROB_9(d4) = 0.07;
+        PROB_12(d4) = 0.07;
+        PROB_15(d4) = 0.08;
+        PROB_17(d4) = 0.09;
+        PROB_19(d4) = 0.06;
+        PROB_20(d4) = 0.20;
+
+        // unfair 6-sided die with random probabilities and
+        // random faces
+        PROB_1(d5) = 0.16;
+        PROB_3(d5) = 0.04;
+        PROB_6(d5) = 0.02;
+        PROB_9(d5) = 0.26;
+        PROB_12(d5) = 0.22;
+        PROB_19(d5) = 0.30;
+    };
+
+    init-state {
+        ~die-value-seen_1;
+    };
+
+    horizon = 40;
+
+    discount = 1.0;
+}

@@ -192,28 +192,24 @@ public class Server implements Runnable {
 				rand_seed = DEFAULT_SEED;
 			}
             if (args.length > 4) {
-                if (args[4].equals("1"))
-                    INDIVIDUAL_SESSION = true;
-            }
-            if (args.length > 5) {
-                if (args[5].equals("0")) {
+                if (args[4].equals("0")) {
                     USE_TIMEOUT = false;
 		} else {
 			USE_TIMEOUT = true;
-			DEFAULT_TIME_ALLOWED = Integer.valueOf(args[5]) * 1000;
+			DEFAULT_TIME_ALLOWED = Integer.valueOf(args[4]) * 1000;
 		}
             }
-            if (args.length > 6) {
-                LOG_FILE = args[6] + "/logs";
+            if (args.length > 5) {
+                LOG_FILE = args[5] + "/logs";
             }
-            if (args.length > 7) {
-                assert(args[7].equals("0") || args[7].equals("1"));
-                if (args[7].equals("1")) {
+            if (args.length > 6) {
+                assert(args[6].equals("0") || args[6].equals("1"));
+                if (args[6].equals("1")) {
                     MONITOR_EXECUTION = true;
                 }
             }
-			if (args.length > 8) {
-				state_viz = (StateViz)Class.forName(args[8]).newInstance();
+			if (args.length > 7) {
+				state_viz = (StateViz)Class.forName(args[7]).newInstance();
 			}
 			System.out.println("RDDL Server Initialized");
 			while (true) {

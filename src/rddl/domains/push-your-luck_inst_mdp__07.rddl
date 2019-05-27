@@ -1,0 +1,48 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+//                                                                             //
+// RDDL MDP version of Push Your Luck instance #07 for IPC 2018 by Thomas      //
+// Keller (tho.keller [at] unibas.ch).                                         //
+//                                                                             //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+instance push-your-luck_inst_mdp__07 {
+    domain = push-your-luck_mdp;
+
+    objects {
+        die : { d1, d2 };
+    };
+
+    non-fluents {
+        // reward factor is half the die value
+        VALUE_1 = 0.5;
+        VALUE_2 = 1.0;
+        VALUE_3 = 1.5;
+        VALUE_4 = 2.0;
+        VALUE_5 = 2.5;
+        VALUE_6 = 3.0;
+
+        // unfair 5-sided die with increasing probabilities and values from 2 to 6
+        PROB_2(d1) = 0.1;
+        PROB_3(d1) = 0.15;
+        PROB_4(d1) = 0.2;
+        PROB_5(d1) = 0.25;
+        PROB_6(d1) = 0.3;
+
+        // unfair 5-sided die with decreasing probabilities and values from 1 to 5
+        PROB_1(d2) = 0.3;
+        PROB_2(d2) = 0.25;
+        PROB_3(d2) = 0.2;
+        PROB_4(d2) = 0.15;
+        PROB_5(d2) = 0.1;	
+    };
+
+    init-state {
+        ~die-value-seen_1;
+    };
+
+    horizon = 40;
+
+    discount = 1.0;
+}

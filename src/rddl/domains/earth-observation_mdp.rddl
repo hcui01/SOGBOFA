@@ -1,0 +1,69 @@
+// GENERATED AUTOMATICALLY
+
+domain earth-observation_mdp {
+    types {
+        patch : object;
+    };
+
+    pvariables {
+        FAILURE_PROB_HIGH_VIS : { non-fluent, real, default = 0.05 };
+        FAILURE_PROB_MEDIUM_VIS : { non-fluent, real, default = 0.3 };
+        FAILURE_PROB_LOW_VIS : { non-fluent, real, default = 0.7 };
+        HIGH_TO_MEDIUM_VIS : { non-fluent, real, default = 0.3 };
+        HIGH_TO_LOW_VIS : { non-fluent, real, default = 0.1 };
+        MEDIUM_TO_HIGH_VIS : { non-fluent, real, default = 0.3 };
+        MEDIUM_TO_LOW_VIS : { non-fluent, real, default = 0.2 };
+        LOW_TO_MEDIUM_VIS : { non-fluent, real, default = 0.35 };
+        LOW_TO_HIGH_VIS : { non-fluent, real, default = 0.2 };
+        CONNECTED_north-east(patch, patch) : { non-fluent, bool, default = false };
+        CONNECTED_south-east(patch, patch) : { non-fluent, bool, default = false };
+        CONNECTED_east(patch, patch) : { non-fluent, bool, default = false };
+
+        visibility_is_high_interm(patch) : { interm-fluent, bool, level = 1 };
+        visibility_is_medium_interm(patch) : { interm-fluent, bool, level = 2 };
+        visibility_is_low_interm(patch) : { interm-fluent, bool, level = 3 };
+
+        is-focal-point(patch) : { state-fluent, bool, default = false };
+        is-target(patch) : { state-fluent, bool, default = false };
+        visibility_is_high(patch) : { state-fluent, bool, default = false };
+        visibility_is_medium(patch) : { state-fluent, bool, default = true };
+        visibility_is_low(patch) : { state-fluent, bool, default = false };
+
+        slew_north-east : { action-fluent, bool, default = false };
+        slew_south-east : { action-fluent, bool, default = false };
+        slew_east : { action-fluent, bool, default = false };
+        take-image : { action-fluent, bool, default = false };
+    };
+
+    cpfs {
+        visibility_is_high_interm(?p) = Bernoulli ( ( ( visibility_is_high( ?p ) ) * ( 1.0 - HIGH_TO_LOW_VIS - HIGH_TO_MEDIUM_VIS ) ) + ( ( visibility_is_low( ?p ) ) * LOW_TO_HIGH_VIS ) + ( ( visibility_is_medium( ?p ) ) * MEDIUM_TO_HIGH_VIS ) );
+
+        visibility_is_medium_interm(?p) = ~visibility_is_high_interm( ?p ) & Bernoulli ( ( ( ( visibility_is_high( ?p ) ) * HIGH_TO_MEDIUM_VIS ) + ( ( visibility_is_low( ?p ) ) * LOW_TO_MEDIUM_VIS ) + ( ( visibility_is_medium( ?p ) ) * ( 1.0 - MEDIUM_TO_HIGH_VIS - MEDIUM_TO_LOW_VIS ) ) ) / ( 1.0 - ( ( ( visibility_is_high( ?p ) ) * ( 1.0 - HIGH_TO_LOW_VIS - HIGH_TO_MEDIUM_VIS ) ) + ( ( visibility_is_low( ?p ) ) * LOW_TO_HIGH_VIS ) + ( ( visibility_is_medium( ?p ) ) * MEDIUM_TO_HIGH_VIS ) ) ) );
+
+        visibility_is_low_interm(?p) = ~visibility_is_high_interm( ?p ) & ~visibility_is_medium_interm( ?p );
+
+
+        is-focal-point'(?next) = exists_{ ?last : patch } [ ( ( is-focal-point( ?last ) & CONNECTED_north-east( ?last , ?next ) & slew_north-east ) | ( is-focal-point( ?last ) & CONNECTED_south-east( ?last , ?next ) & slew_south-east ) | ( is-focal-point( ?last ) & CONNECTED_east( ?last , ?next ) & (slew_east | take-image) ) ) ];
+
+        is-target'(?p) = if ( is-target( ?p ) & is-focal-point( ?p ) & take-image & ( visibility_is_high( ?p ) ) ) then Bernoulli ( FAILURE_PROB_HIGH_VIS ) else if ( is-target( ?p ) & is-focal-point( ?p ) & take-image & ( visibility_is_medium( ?p ) ) ) then Bernoulli ( FAILURE_PROB_MEDIUM_VIS ) else if ( is-target( ?p ) & is-focal-point( ?p ) & take-image & ( visibility_is_low( ?p ) ) ) then Bernoulli ( FAILURE_PROB_LOW_VIS ) else is-target( ?p );
+
+        visibility_is_high'(?p) = visibility_is_high_interm( ?p );
+
+        visibility_is_medium'(?p) = visibility_is_medium_interm( ?p );
+
+        visibility_is_low'(?p) = visibility_is_low_interm( ?p );
+
+    };
+
+    reward = 0 - ( sum_{ ?p : patch } [ is-target( ?p ) ] ) - ( slew_north-east + slew_south-east + take-image ) ;
+
+    action-preconditions {
+        forall_{ ?p : patch } [ ( ( ( is-focal-point( ?p ) & slew_north-east ) => exists_{ ?p2 : patch } [ CONNECTED_north-east( ?p , ?p2 ) ] ) ) ];
+        forall_{ ?p : patch } [ ( ( ( is-focal-point( ?p ) & slew_south-east ) => exists_{ ?p2 : patch } [ CONNECTED_south-east( ?p , ?p2 ) ] ) ) ];
+        forall_{ ?p : patch } [ ( ( ( is-focal-point( ?p ) & slew_east ) => exists_{ ?p2 : patch } [ CONNECTED_east( ?p , ?p2 ) ] ) ) ] ;
+        forall_{ ?p : patch } [ ( ( ( is-focal-point( ?p ) & take-image) => exists_{ ?p2 : patch } [ CONNECTED_east( ?p , ?p2 ) ] ) ) ] ;
+
+        slew_north-east + slew_south-east + take-image + slew_east == 1;
+    };
+
+}

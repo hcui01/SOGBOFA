@@ -1,0 +1,86 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+//                                                                             //
+// RDDL MDP version of Chromatic Dice instance #03 for IPC 2018 by Thomas      //
+// Keller (tho.keller [at] unibas.ch).                                         //
+//                                                                             //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+instance chromatic-dice_inst_mdp__03 {
+    domain = chromatic-dice_mdp;
+
+    objects {
+        die : {d1, d2, d3, d4, d5};
+    };
+
+    non-fluents {
+        // VALUE_PROB
+        VALUE_PROB_1 = 0.166666666;
+        VALUE_PROB_2 = 0.166666667;
+        VALUE_PROB_3 = 0.166666667;
+        VALUE_PROB_4 = 0.166666667;
+        VALUE_PROB_5 = 0.166666667;
+        VALUE_PROB_6 = 0.166666666;
+
+        // COLOR_PROB
+        COLOR_PROB_red = 1.0;
+        COLOR_PROB_blue = 0.0;
+        COLOR_PROB_green = 0.0;
+        COLOR_PROB_yellow = 0.0;
+        COLOR_PROB_purple = 0.0;
+
+        // BONUS_PROB_VALUE_PART
+        BONUS_PROB_VALUE_PART_1 = 0.0;
+        BONUS_PROB_VALUE_PART_2 = 0.0;
+        BONUS_PROB_VALUE_PART_3 = 0.0;
+        BONUS_PROB_VALUE_PART_4 = 1.0;
+        BONUS_PROB_VALUE_PART_5 = 1.0;
+        BONUS_PROB_VALUE_PART_6 = 1.0;
+
+        // BONUS_PROB_COLOR_PART
+        BONUS_PROB_COLOR_PART_1 = 0.0;
+        BONUS_PROB_COLOR_PART_2 = 0.0;
+        BONUS_PROB_COLOR_PART_3 = 0.0;
+        BONUS_PROB_COLOR_PART_4 = 0.0;
+        BONUS_PROB_COLOR_PART_5 = 0.0;
+        BONUS_PROB_COLOR_PART_6 = 0.0;
+
+        // BONUS_VALUE_PART
+        BONUS_VALUE_PART_1 = 45;
+        BONUS_VALUE_PART_2 = 45;
+        BONUS_VALUE_PART_3 = 45;
+        BONUS_VALUE_PART_4 = 45;
+        BONUS_VALUE_PART_5 = 45;
+        BONUS_VALUE_PART_6 = 45;
+
+        // BONUS_COLOR_PART
+        BONUS_COLOR_PART_1 = 40;
+        BONUS_COLOR_PART_2 = 40;
+        BONUS_COLOR_PART_3 = 40;
+        BONUS_COLOR_PART_4 = 40;
+        BONUS_COLOR_PART_5 = 40;
+        BONUS_COLOR_PART_6 = 40;
+    };
+
+    init-state {
+        taken_reds;
+        taken_blues;
+        taken_greens;
+        taken_yellows;
+        taken_purples;
+        taken_three-of-a-color;
+        taken_four-of-a-color;
+        taken_color-full-house;
+        taken_flush;
+        taken_rainbow;
+        taken_three-of-a-kind;
+        taken_four-of-a-kind;
+        taken_five-of-a-kind;
+    };
+
+    // horizon is four times the number of remaining categories + 2 steps for the boni
+    horizon = 46;
+
+    discount = 1.0;
+}

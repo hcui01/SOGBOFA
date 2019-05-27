@@ -1,0 +1,61 @@
+
+instance elevators_inst_mdp__14 { 
+	domain = elevators_mdp; 
+ 	objects { 
+		elevator : {e0,e1,e2,e3,e4};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.008212442;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.005397369;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.014685497;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.009989738;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.014109375;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.009929168;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.009225668;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.014174281;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.012727809;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.0062596835;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.008911972;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.0060166563;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.009438529;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.0071836202;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.014684658;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.010361092;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.005391975;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.0075551607;
+		ADJACENT-UP(f18,f19) = true;
+		TOP-FLOOR(f19) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+	};
+
+	horizon = 40;
+	discount = 1.0;
+} 
