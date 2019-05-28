@@ -50,6 +50,7 @@ import rddl.State;
 import rddl.parser.ParseException;
 import rddl.parser.parser;
 import rddl.policy.Policy;
+import rddl.policy.RandomEnumPolicy;
 import rddl.viz.StateViz;
 /** The SocketClient class is a simple example of a TCP/IP Socket Client.
  *
@@ -329,7 +330,12 @@ public class SOGBOFA {
 				// get all parameters
 				instanceName = args[0];
 				port = Integer.valueOf(args[1]);
-				clientName = "L_C_SOGBOFA";
+				if(args.length > 2 && args[2].equals("Original")) {
+					clientName = "SOGBOFA_Original";
+				}else {
+					clientName = "L_C_SOGBOFA";
+				}
+				
 				
 				//connect to the server
 				//get back the content of the rddl files
@@ -377,9 +383,7 @@ public class SOGBOFA {
 						new Class[]{String.class}).newInstance(new Object[]{instanceName});
 				//policy.setRDDL(rddl);
 				
-				if(args.length > 3) {
-					Policy.searchDepth = Integer.valueOf(args[3]);
-				}
+				
 				
 				policy.setRandSeed(randomSeed);
 				policy.setVisCounter(visCounter);

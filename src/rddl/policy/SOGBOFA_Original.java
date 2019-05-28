@@ -18,13 +18,13 @@ import rddl.State;
 
 import rddl.*;
 
-public class N_N extends Policy {
+public class SOGBOFA_Original extends Policy {
 	
-	public N_N () {
+	public SOGBOFA_Original () {
 		super();
 	}
 	
-	public N_N(String instance_name) {
+	public SOGBOFA_Original(String instance_name) {
 		super(instance_name);
 		Global.ifLift = false;
 		Global.ifRecordLift = false;
