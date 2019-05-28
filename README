@@ -11,7 +11,7 @@ NEWS
 
 * We fix the bugs and add supports to more action constraints. For more details, see our most recent ICAPS 2019 paper
    http://homes.sice.indiana.edu/rkhardon/PUB/icaps2019-LCsogbofa.pdf
-  We are able to outperform the winner of IPC2018/2014/2011 with a large margin
+  We are able to outperform the winner of IPC2018/2014/2011 with a large margin.
 
 * The latest version of SOGBOFA with the new extention of "lifting" and "conformant" is the runner-up of the most recent IPC2018 competition. For more information, see the competition web page 
    https://ipc2018-probabilistic.bitbucket.io/ 
@@ -35,27 +35,35 @@ You can easily find any paper of your interest at Hao Cui's personal page
 HOW TO USE
 
 * Prerequisites: Java SE 1.8 or higher
+* Compile
+  In the SOGBOFA/ directory, type command ./compile
 * Run the server
-  One can either run the server from RDDLSim Project, or compile and run the Server.java included in our source code with the following arguments
-  rddlfilename-or-dir portnumber num-rounds random-seed timeout 
-  example:
-  /instances 2323 100 1 10000
+  One can either run a server from the RDDLSim Project, or run the Server class compiled from our source code with the following command
+  ./run_server rddlfilename-or-dir portnumber num-rounds random-seed timeout 
+  For example:
+  ./run_server Domains 2323 100 1 10000
+  Note that the time out is the total time (in seconds) allowed to any client connects to it.
 * Run SOGBOFA
-  compile and run the SOGBOFA.java included in our source code with the following arguments
-  instance-name portnumber
+  Type the following command
+  ./run_sogbofa instance-name portnumber
   example:
-  traffic_inst_mdp__10 2323
+  ./run_sogbofa traffic_inst_mdp__10 2323
 * Results
-  After finishing the requested number of runs, the server will record 6 files, with the following names
-  L_C_SOGBOFA_timeout_isntance-name_Score
-  L_C_SOGBOFA_timeout_isntance-name_depthCounter
-  L_C_SOGBOFA_timeout_isntance-name_sizeCounter
-  L_C_SOGBOFA_timeout_isntance-name_rrCounter
-  L_C_SOGBOFA_timeout_isntance-name_seenCounter
-  L_C_SOGBOFA_timeout_isntance-name_updatesCounter
+  After finishing the requested number of runs, 6 files will be recorded in the bin/ folder, with the following names
+  L_C_SOGBOFA_timeout_instance-name_Score
+  L_C_SOGBOFA_timeout_instance-name_depthCounter
+  L_C_SOGBOFA_timeout_instance-name_sizeCounter
+  L_C_SOGBOFA_timeout_instance-name_rrCounter
+  L_C_SOGBOFA_timeout_instance-name_seenCounter
+  L_C_SOGBOFA_timeout_instance-name_updatesCounter
   which record respectively the average score of the runs, the average depth of the search, the average size of the computation graph, the average number of radnom restarts, the average number of action evaluated, the average number of gradient updates.
   The Score file has three numbers, respectively the instance index, the average cumulative reward, and the standard deviation. The other files only has one number inside.
   
+-------------------------------------------------------------------------
+IJCAI2016 VERSION
+
+We have a copy of the source code used in the experiments of our IJCAI2016 paper (the very first SOGBOFA paper), but for consistency we no longer maintain github page for that version. If you are interested, please contact bitcuihao@gmail.com and we'll directly send you the code and instructions. 
+
 -------------------------------------------------------------------------
 OTHER WORK
 
