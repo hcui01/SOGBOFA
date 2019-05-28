@@ -75,7 +75,7 @@ RDDL FILES READY TO USE
 
 Please find all domain and instance files that we used in the ICAPS 2019 paper in the Domains/ folder. It includes all IPC2018 
 competition problems, plus the elevators, traffic, skill_teaching and tamarisk from IPC2014. Of ourse you can alwalys define your own 
-problem using RDDL and run with our planner.
+domains using RDDL and run our planner with them.
 
 -------------------------------------------------------------------------
 IJCAI2016 VERSION
