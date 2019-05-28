@@ -1,0 +1,72 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+//                                                                             //
+// RDDL MDP version of Push Your Luck instance #09 for IPC 2018 by Thomas      //
+// Keller (tho.keller [at] unibas.ch).                                         //
+//                                                                             //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+instance push-your-luck_inst_mdp__09 {
+    domain = push-your-luck_mdp;
+
+    objects {
+        die : { d1, d2 };
+    };
+
+    non-fluents {
+        // reward factor is 0.25 plus a quarter of the die value
+        VALUE_1 = 0.5;
+        VALUE_2 = 0.75;
+        VALUE_3 = 1.0;
+        VALUE_4 = 1.25;
+        VALUE_5 = 1.5;
+        VALUE_6 = 1.75;
+        VALUE_7 = 2.0;
+        VALUE_8 = 2.25;
+        VALUE_9 = 2.5;
+        VALUE_10 = 2.75;
+        VALUE_11 = 3.0;
+        VALUE_12 = 3.25;
+        VALUE_13 = 3.5;
+        VALUE_14 = 3.75;
+        VALUE_15 = 4.0;
+        VALUE_16 = 4.25;
+        VALUE_17 = 4.5;
+        VALUE_18 = 4.75;
+        VALUE_19 = 5.0;
+        VALUE_20 = 5.25;
+
+        // fair 10-sided die with even values up to 20
+        PROB_2(d1) = 0.1;
+        PROB_4(d1) = 0.1;
+        PROB_6(d1) = 0.1;
+        PROB_8(d1) = 0.1;
+        PROB_10(d1) = 0.1;
+        PROB_12(d1) = 0.1;
+        PROB_14(d1) = 0.1;
+        PROB_16(d1) = 0.1;
+        PROB_18(d1) = 0.1;
+        PROB_20(d1) = 0.1;
+
+        // fair 10-sided die with odd values up to 20
+        PROB_1(d2) = 0.1;
+        PROB_3(d2) = 0.1;
+        PROB_5(d2) = 0.1;
+        PROB_7(d2) = 0.1;
+        PROB_9(d2) = 0.1;
+        PROB_11(d2) = 0.1;
+        PROB_13(d2) = 0.1;
+        PROB_15(d2) = 0.1;
+        PROB_17(d2) = 0.1;
+        PROB_19(d2) = 0.1;
+    };
+
+    init-state {
+        ~die-value-seen_1;
+    };
+
+    horizon = 40;
+
+    discount = 1.0;
+}

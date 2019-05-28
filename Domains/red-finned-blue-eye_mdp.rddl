@@ -1,0 +1,129 @@
+// GENERATED AUTOMATICALLY
+
+domain red-finned-blue-eye_mdp {
+    types {
+        spring : object;
+    };
+
+    pvariables {
+        ACTION_POINTS : { non-fluent, int, default = 3 };
+        REWARD_RED_FINNED_BLUE_EYE_POPULATION : { non-fluent, int, default = 50 };
+        PENALTY_RED_FINNED_BLUE_EYE_EXTINCT : { non-fluent, int, default = 200 };
+        PENALTY_POISON_USAGE : { non-fluent, int, default = 30 };
+        HIGH_WATER_PROB_exceptionally-high : { non-fluent, real, default = 0.0 };
+        HIGH_WATER_PROB_very-high : { non-fluent, real, default = 0.0 };
+        HIGH_WATER_PROB_high : { non-fluent, real, default = 0.0 };
+        HIGH_WATER_PROB_average : { non-fluent, real, default = 0.0 };
+        HIGH_WATER_PROB_low : { non-fluent, real, default = 0.0 };
+        HIGH_WATER_PROB_very-low : { non-fluent, real, default = 0.0 };
+        HIGH_WATER_PROB_exceptionally-low : { non-fluent, real, default = 0.0 };
+        SPRINGS_CONNECTED_exceptionally-high(spring, spring) : { non-fluent, bool, default = false };
+        SPRINGS_CONNECTED_very-high(spring, spring) : { non-fluent, bool, default = false };
+        SPRINGS_CONNECTED_high(spring, spring) : { non-fluent, bool, default = false };
+        SPRINGS_CONNECTED_average(spring, spring) : { non-fluent, bool, default = false };
+        SPRINGS_CONNECTED_low(spring, spring) : { non-fluent, bool, default = false };
+        SPRINGS_CONNECTED_very-low(spring, spring) : { non-fluent, bool, default = false };
+        SPRINGS_CONNECTED_exceptionally-low(spring, spring) : { non-fluent, bool, default = false };
+        GAMBUSIA_COLONIZE_PROB(spring, spring) : { non-fluent, real, default = 0.0 };
+        NATURAL_MORTALITY_PROB(spring) : { non-fluent, real, default = 0.0 };
+        POISON_SUCCESS_PROB : { non-fluent, real, default = 0.0 };
+        REMOVE_MANUALLY_SUCCESS_PROB : { non-fluent, real, default = 0.0 };
+        TRANSLOCATION_SUCCESS_PROB : { non-fluent, real, default = 0.0 };
+        TRANSLOCATION_INTERVAL_is_0 : { non-fluent, bool, default = false };
+        TRANSLOCATION_INTERVAL_is_1 : { non-fluent, bool, default = false };
+        TRANSLOCATION_INTERVAL_is_2 : { non-fluent, bool, default = false };
+        TRANSLOCATION_INTERVAL_is_3 : { non-fluent, bool, default = false };
+        TRANSLOCATION_INTERVAL_is_4 : { non-fluent, bool, default = true };
+        TRANSLOCATION_INTERVAL_is_5 : { non-fluent, bool, default = false };
+        TRANSLOCATION_INTERVAL_is_6 : { non-fluent, bool, default = false };
+        TRANSLOCATION_INTERVAL_is_7 : { non-fluent, bool, default = false };
+        TRANSLOCATION_INTERVAL_is_8 : { non-fluent, bool, default = false };
+
+        high-water-mark_is_exceptionally-high : { interm-fluent, bool, level = 1 };
+        high-water-mark_is_very-high : { interm-fluent, bool, level = 2 };
+        high-water-mark_is_high : { interm-fluent, bool, level = 3 };
+        high-water-mark_is_average : { interm-fluent, bool, level = 4 };
+        high-water-mark_is_low : { interm-fluent, bool, level = 5 };
+        high-water-mark_is_very-low : { interm-fluent, bool, level = 6 };
+        high-water-mark_is_exceptionally-low : { interm-fluent, bool, level = 7 };
+
+        population_is_red-finned-blue-eye(spring) : { state-fluent, bool, default = false };
+        population_is_gambusia(spring) : { state-fluent, bool, default = false };
+        population_is_none(spring) : { state-fluent, bool, default = true };
+        translocate-possible-in_is_0 : { state-fluent, bool, default = true };
+        translocate-possible-in_is_1 : { state-fluent, bool, default = false };
+        translocate-possible-in_is_2 : { state-fluent, bool, default = false };
+        translocate-possible-in_is_3 : { state-fluent, bool, default = false };
+        translocate-possible-in_is_4 : { state-fluent, bool, default = false };
+        translocate-possible-in_is_5 : { state-fluent, bool, default = false };
+        translocate-possible-in_is_6 : { state-fluent, bool, default = false };
+        translocate-possible-in_is_7 : { state-fluent, bool, default = false };
+        translocate-possible-in_is_8 : { state-fluent, bool, default = false };
+
+        poison(spring) : { action-fluent, bool, default = false };
+        remove-manually(spring) : { action-fluent, bool, default = false };
+        translocate-to(spring) : { action-fluent, bool, default = false };
+    };
+
+    cpfs {
+        high-water-mark_is_exceptionally-high = Bernoulli ( HIGH_WATER_PROB_exceptionally-high );
+
+        high-water-mark_is_very-high = ~high-water-mark_is_exceptionally-high & Bernoulli ( ( HIGH_WATER_PROB_very-high ) / ( 1.0 - ( HIGH_WATER_PROB_exceptionally-high ) ) );
+
+        high-water-mark_is_high = ~high-water-mark_is_exceptionally-high & ~high-water-mark_is_very-high & Bernoulli ( ( HIGH_WATER_PROB_high ) / ( 1.0 - ( HIGH_WATER_PROB_exceptionally-high ) - ( HIGH_WATER_PROB_very-high ) ) );
+
+        high-water-mark_is_average = ~high-water-mark_is_exceptionally-high & ~high-water-mark_is_very-high & ~high-water-mark_is_high & Bernoulli ( ( HIGH_WATER_PROB_average ) / ( 1.0 - ( HIGH_WATER_PROB_exceptionally-high ) - ( HIGH_WATER_PROB_very-high ) - ( HIGH_WATER_PROB_high ) ) );
+
+        high-water-mark_is_low = ~high-water-mark_is_exceptionally-high & ~high-water-mark_is_very-high & ~high-water-mark_is_high & ~high-water-mark_is_average & Bernoulli ( ( HIGH_WATER_PROB_low ) / ( 1.0 - ( HIGH_WATER_PROB_exceptionally-high ) - ( HIGH_WATER_PROB_very-high ) - ( HIGH_WATER_PROB_high ) - ( HIGH_WATER_PROB_average ) ) );
+
+        high-water-mark_is_very-low = ~high-water-mark_is_exceptionally-high & ~high-water-mark_is_very-high & ~high-water-mark_is_high & ~high-water-mark_is_average & ~high-water-mark_is_low & Bernoulli ( ( HIGH_WATER_PROB_very-low ) / ( 1.0 - ( HIGH_WATER_PROB_exceptionally-high ) - ( HIGH_WATER_PROB_very-high ) - ( HIGH_WATER_PROB_high ) - ( HIGH_WATER_PROB_average ) - ( HIGH_WATER_PROB_low ) ) );
+
+        high-water-mark_is_exceptionally-low = ~high-water-mark_is_exceptionally-high & ~high-water-mark_is_very-high & ~high-water-mark_is_high & ~high-water-mark_is_average & ~high-water-mark_is_low & ~high-water-mark_is_very-low;
+
+
+        population_is_red-finned-blue-eye'(?s) = if ( poison( ?s ) & Bernoulli ( POISON_SUCCESS_PROB ) ) then false else if ( remove-manually( ?s ) & Bernoulli ( REMOVE_MANUALLY_SUCCESS_PROB ) ) then false else if ( translocate-to( ?s ) & Bernoulli ( TRANSLOCATION_SUCCESS_PROB ) ) then true else if ( ( ~population_is_red-finned-blue-eye( ?s ) ) & Bernoulli ( NATURAL_MORTALITY_PROB( ?s ) ) ) then false else if ( Bernoulli ( 1.0 - ( prod_{ ?s2 : spring } [ 1.0 - ( ( ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_exceptionally-high ) * ( SPRINGS_CONNECTED_exceptionally-high( ?s , ?s2 ) + SPRINGS_CONNECTED_exceptionally-high( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_very-high ) * ( SPRINGS_CONNECTED_very-high( ?s , ?s2 ) + SPRINGS_CONNECTED_very-high( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_high ) * ( SPRINGS_CONNECTED_high( ?s , ?s2 ) + SPRINGS_CONNECTED_high( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_average ) * ( SPRINGS_CONNECTED_average( ?s , ?s2 ) + SPRINGS_CONNECTED_average( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_low ) * ( SPRINGS_CONNECTED_low( ?s , ?s2 ) + SPRINGS_CONNECTED_low( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_very-low ) * ( SPRINGS_CONNECTED_very-low( ?s , ?s2 ) + SPRINGS_CONNECTED_very-low( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_exceptionally-low ) * ( SPRINGS_CONNECTED_exceptionally-low( ?s , ?s2 ) + SPRINGS_CONNECTED_exceptionally-low( ?s2 , ?s ) ) ) ) ) ] ) ) ) then false else ( if ( population_is_red-finned-blue-eye( ?s ) ) then true else if ( population_is_gambusia( ?s ) ) then false else false );
+
+        population_is_gambusia'(?s) = if ( poison( ?s ) & Bernoulli ( POISON_SUCCESS_PROB ) ) then false else if ( remove-manually( ?s ) & Bernoulli ( REMOVE_MANUALLY_SUCCESS_PROB ) ) then false else if ( translocate-to( ?s ) & Bernoulli ( TRANSLOCATION_SUCCESS_PROB ) ) then false else if ( ( ~population_is_red-finned-blue-eye( ?s ) ) & Bernoulli ( NATURAL_MORTALITY_PROB( ?s ) ) ) then false else if ( Bernoulli ( 1.0 - ( prod_{ ?s2 : spring } [ 1.0 - ( ( ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_exceptionally-high ) * ( SPRINGS_CONNECTED_exceptionally-high( ?s , ?s2 ) + SPRINGS_CONNECTED_exceptionally-high( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_very-high ) * ( SPRINGS_CONNECTED_very-high( ?s , ?s2 ) + SPRINGS_CONNECTED_very-high( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_high ) * ( SPRINGS_CONNECTED_high( ?s , ?s2 ) + SPRINGS_CONNECTED_high( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_average ) * ( SPRINGS_CONNECTED_average( ?s , ?s2 ) + SPRINGS_CONNECTED_average( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_low ) * ( SPRINGS_CONNECTED_low( ?s , ?s2 ) + SPRINGS_CONNECTED_low( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_very-low ) * ( SPRINGS_CONNECTED_very-low( ?s , ?s2 ) + SPRINGS_CONNECTED_very-low( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_exceptionally-low ) * ( SPRINGS_CONNECTED_exceptionally-low( ?s , ?s2 ) + SPRINGS_CONNECTED_exceptionally-low( ?s2 , ?s ) ) ) ) ) ] ) ) ) then true else ( if ( population_is_red-finned-blue-eye( ?s ) ) then false else if ( population_is_gambusia( ?s ) ) then true else false );
+
+        population_is_none'(?s) = if ( poison( ?s ) & Bernoulli ( POISON_SUCCESS_PROB ) ) then true else if ( remove-manually( ?s ) & Bernoulli ( REMOVE_MANUALLY_SUCCESS_PROB ) ) then true else if ( translocate-to( ?s ) & Bernoulli ( TRANSLOCATION_SUCCESS_PROB ) ) then false else if ( ( ~population_is_red-finned-blue-eye( ?s ) ) & Bernoulli ( NATURAL_MORTALITY_PROB( ?s ) ) ) then true else if ( Bernoulli ( 1.0 - ( prod_{ ?s2 : spring } [ 1.0 - ( ( ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_exceptionally-high ) * ( SPRINGS_CONNECTED_exceptionally-high( ?s , ?s2 ) + SPRINGS_CONNECTED_exceptionally-high( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_very-high ) * ( SPRINGS_CONNECTED_very-high( ?s , ?s2 ) + SPRINGS_CONNECTED_very-high( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_high ) * ( SPRINGS_CONNECTED_high( ?s , ?s2 ) + SPRINGS_CONNECTED_high( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_average ) * ( SPRINGS_CONNECTED_average( ?s , ?s2 ) + SPRINGS_CONNECTED_average( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_low ) * ( SPRINGS_CONNECTED_low( ?s , ?s2 ) + SPRINGS_CONNECTED_low( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_very-low ) * ( SPRINGS_CONNECTED_very-low( ?s , ?s2 ) + SPRINGS_CONNECTED_very-low( ?s2 , ?s ) ) ) + ( ( population_is_gambusia( ?s2 ) ) * ( high-water-mark_is_exceptionally-low ) * ( SPRINGS_CONNECTED_exceptionally-low( ?s , ?s2 ) + SPRINGS_CONNECTED_exceptionally-low( ?s2 , ?s ) ) ) ) ) ] ) ) ) then false else ( if ( population_is_red-finned-blue-eye( ?s ) ) then false else if ( population_is_gambusia( ?s ) ) then false else true );
+
+        translocate-possible-in_is_0' = if ( exists_{ ?s : spring } [ translocate-to( ?s ) ] ) then ( if ( TRANSLOCATION_INTERVAL_is_0 ) then true else if ( TRANSLOCATION_INTERVAL_is_1 ) then false else if ( TRANSLOCATION_INTERVAL_is_2 ) then false else if ( TRANSLOCATION_INTERVAL_is_3 ) then false else if ( TRANSLOCATION_INTERVAL_is_4 ) then false else if ( TRANSLOCATION_INTERVAL_is_5 ) then false else if ( TRANSLOCATION_INTERVAL_is_6 ) then false else if ( TRANSLOCATION_INTERVAL_is_7 ) then false else false ) else if ( translocate-possible-in_is_8 ) then false else if ( translocate-possible-in_is_7 ) then false else if ( translocate-possible-in_is_6 ) then false else if ( translocate-possible-in_is_5 ) then false else if ( translocate-possible-in_is_4 ) then false else if ( translocate-possible-in_is_3 ) then false else if ( translocate-possible-in_is_2 ) then false else true;
+
+        translocate-possible-in_is_1' = if ( exists_{ ?s : spring } [ translocate-to( ?s ) ] ) then ( if ( TRANSLOCATION_INTERVAL_is_0 ) then false else if ( TRANSLOCATION_INTERVAL_is_1 ) then true else if ( TRANSLOCATION_INTERVAL_is_2 ) then false else if ( TRANSLOCATION_INTERVAL_is_3 ) then false else if ( TRANSLOCATION_INTERVAL_is_4 ) then false else if ( TRANSLOCATION_INTERVAL_is_5 ) then false else if ( TRANSLOCATION_INTERVAL_is_6 ) then false else if ( TRANSLOCATION_INTERVAL_is_7 ) then false else false ) else if ( translocate-possible-in_is_8 ) then false else if ( translocate-possible-in_is_7 ) then false else if ( translocate-possible-in_is_6 ) then false else if ( translocate-possible-in_is_5 ) then false else if ( translocate-possible-in_is_4 ) then false else if ( translocate-possible-in_is_3 ) then false else if ( translocate-possible-in_is_2 ) then true else false;
+
+        translocate-possible-in_is_2' = if ( exists_{ ?s : spring } [ translocate-to( ?s ) ] ) then ( if ( TRANSLOCATION_INTERVAL_is_0 ) then false else if ( TRANSLOCATION_INTERVAL_is_1 ) then false else if ( TRANSLOCATION_INTERVAL_is_2 ) then true else if ( TRANSLOCATION_INTERVAL_is_3 ) then false else if ( TRANSLOCATION_INTERVAL_is_4 ) then false else if ( TRANSLOCATION_INTERVAL_is_5 ) then false else if ( TRANSLOCATION_INTERVAL_is_6 ) then false else if ( TRANSLOCATION_INTERVAL_is_7 ) then false else false ) else if ( translocate-possible-in_is_8 ) then false else if ( translocate-possible-in_is_7 ) then false else if ( translocate-possible-in_is_6 ) then false else if ( translocate-possible-in_is_5 ) then false else if ( translocate-possible-in_is_4 ) then false else if ( translocate-possible-in_is_3 ) then true else if ( translocate-possible-in_is_2 ) then false else false;
+
+        translocate-possible-in_is_3' = if ( exists_{ ?s : spring } [ translocate-to( ?s ) ] ) then ( if ( TRANSLOCATION_INTERVAL_is_0 ) then false else if ( TRANSLOCATION_INTERVAL_is_1 ) then false else if ( TRANSLOCATION_INTERVAL_is_2 ) then false else if ( TRANSLOCATION_INTERVAL_is_3 ) then true else if ( TRANSLOCATION_INTERVAL_is_4 ) then false else if ( TRANSLOCATION_INTERVAL_is_5 ) then false else if ( TRANSLOCATION_INTERVAL_is_6 ) then false else if ( TRANSLOCATION_INTERVAL_is_7 ) then false else false ) else if ( translocate-possible-in_is_8 ) then false else if ( translocate-possible-in_is_7 ) then false else if ( translocate-possible-in_is_6 ) then false else if ( translocate-possible-in_is_5 ) then false else if ( translocate-possible-in_is_4 ) then true else if ( translocate-possible-in_is_3 ) then false else if ( translocate-possible-in_is_2 ) then false else false;
+
+        translocate-possible-in_is_4' = if ( exists_{ ?s : spring } [ translocate-to( ?s ) ] ) then ( if ( TRANSLOCATION_INTERVAL_is_0 ) then false else if ( TRANSLOCATION_INTERVAL_is_1 ) then false else if ( TRANSLOCATION_INTERVAL_is_2 ) then false else if ( TRANSLOCATION_INTERVAL_is_3 ) then false else if ( TRANSLOCATION_INTERVAL_is_4 ) then true else if ( TRANSLOCATION_INTERVAL_is_5 ) then false else if ( TRANSLOCATION_INTERVAL_is_6 ) then false else if ( TRANSLOCATION_INTERVAL_is_7 ) then false else false ) else if ( translocate-possible-in_is_8 ) then false else if ( translocate-possible-in_is_7 ) then false else if ( translocate-possible-in_is_6 ) then false else if ( translocate-possible-in_is_5 ) then true else if ( translocate-possible-in_is_4 ) then false else if ( translocate-possible-in_is_3 ) then false else if ( translocate-possible-in_is_2 ) then false else false;
+
+        translocate-possible-in_is_5' = if ( exists_{ ?s : spring } [ translocate-to( ?s ) ] ) then ( if ( TRANSLOCATION_INTERVAL_is_0 ) then false else if ( TRANSLOCATION_INTERVAL_is_1 ) then false else if ( TRANSLOCATION_INTERVAL_is_2 ) then false else if ( TRANSLOCATION_INTERVAL_is_3 ) then false else if ( TRANSLOCATION_INTERVAL_is_4 ) then false else if ( TRANSLOCATION_INTERVAL_is_5 ) then true else if ( TRANSLOCATION_INTERVAL_is_6 ) then false else if ( TRANSLOCATION_INTERVAL_is_7 ) then false else false ) else if ( translocate-possible-in_is_8 ) then false else if ( translocate-possible-in_is_7 ) then false else if ( translocate-possible-in_is_6 ) then true else if ( translocate-possible-in_is_5 ) then false else if ( translocate-possible-in_is_4 ) then false else if ( translocate-possible-in_is_3 ) then false else if ( translocate-possible-in_is_2 ) then false else false;
+
+        translocate-possible-in_is_6' = if ( exists_{ ?s : spring } [ translocate-to( ?s ) ] ) then ( if ( TRANSLOCATION_INTERVAL_is_0 ) then false else if ( TRANSLOCATION_INTERVAL_is_1 ) then false else if ( TRANSLOCATION_INTERVAL_is_2 ) then false else if ( TRANSLOCATION_INTERVAL_is_3 ) then false else if ( TRANSLOCATION_INTERVAL_is_4 ) then false else if ( TRANSLOCATION_INTERVAL_is_5 ) then false else if ( TRANSLOCATION_INTERVAL_is_6 ) then true else if ( TRANSLOCATION_INTERVAL_is_7 ) then false else false ) else if ( translocate-possible-in_is_8 ) then false else if ( translocate-possible-in_is_7 ) then true else if ( translocate-possible-in_is_6 ) then false else if ( translocate-possible-in_is_5 ) then false else if ( translocate-possible-in_is_4 ) then false else if ( translocate-possible-in_is_3 ) then false else if ( translocate-possible-in_is_2 ) then false else false;
+
+        translocate-possible-in_is_7' = if ( exists_{ ?s : spring } [ translocate-to( ?s ) ] ) then ( if ( TRANSLOCATION_INTERVAL_is_0 ) then false else if ( TRANSLOCATION_INTERVAL_is_1 ) then false else if ( TRANSLOCATION_INTERVAL_is_2 ) then false else if ( TRANSLOCATION_INTERVAL_is_3 ) then false else if ( TRANSLOCATION_INTERVAL_is_4 ) then false else if ( TRANSLOCATION_INTERVAL_is_5 ) then false else if ( TRANSLOCATION_INTERVAL_is_6 ) then false else if ( TRANSLOCATION_INTERVAL_is_7 ) then true else false ) else if ( translocate-possible-in_is_8 ) then true else if ( translocate-possible-in_is_7 ) then false else if ( translocate-possible-in_is_6 ) then false else if ( translocate-possible-in_is_5 ) then false else if ( translocate-possible-in_is_4 ) then false else if ( translocate-possible-in_is_3 ) then false else if ( translocate-possible-in_is_2 ) then false else false;
+
+        translocate-possible-in_is_8' = if ( exists_{ ?s : spring } [ translocate-to( ?s ) ] ) then ( if ( TRANSLOCATION_INTERVAL_is_0 ) then false else if ( TRANSLOCATION_INTERVAL_is_1 ) then false else if ( TRANSLOCATION_INTERVAL_is_2 ) then false else if ( TRANSLOCATION_INTERVAL_is_3 ) then false else if ( TRANSLOCATION_INTERVAL_is_4 ) then false else if ( TRANSLOCATION_INTERVAL_is_5 ) then false else if ( TRANSLOCATION_INTERVAL_is_6 ) then false else if ( TRANSLOCATION_INTERVAL_is_7 ) then false else true ) else if ( translocate-possible-in_is_8 ) then false else if ( translocate-possible-in_is_7 ) then false else if ( translocate-possible-in_is_6 ) then false else if ( translocate-possible-in_is_5 ) then false else if ( translocate-possible-in_is_4 ) then false else if ( translocate-possible-in_is_3 ) then false else if ( translocate-possible-in_is_2 ) then false else false;
+
+    };
+
+    reward = ( ( sum_{ ?s : spring } [ ( population_is_red-finned-blue-eye( ?s ) ) * REWARD_RED_FINNED_BLUE_EYE_POPULATION ] ) - ( sum_{ ?s : spring } [ poison( ?s ) * PENALTY_POISON_USAGE ] ) ) - ( ( forall_{ ?s : spring } [ ~population_is_red-finned-blue-eye( ?s ) ] ) * PENALTY_RED_FINNED_BLUE_EYE_EXTINCT ) ;
+
+    action-preconditions {
+         ( ( sum_{ ?s : spring } [ poison( ?s ) ] ) + ( sum_{ ?s : spring } [ 2 * remove-manually( ?s ) ] ) + ( sum_{ ?s : spring } [ 3 * translocate-to( ?s ) ] ) ) <= ACTION_POINTS;
+
+        forall_{ ?s : spring } [ translocate-to( ?s ) => ( population_is_none( ?s ) ) ] ;
+
+        forall_{ ?s : spring } [ translocate-to( ?s ) => ( translocate-possible-in_is_0 ) ] ;
+
+        forall_{ ?s : spring } [ translocate-to( ?s ) => ( exists_{ ?s2 : spring } [ population_is_red-finned-blue-eye( ?s2 ) ] ) ] ;
+
+        forall_{ ?s : spring } [ poison( ?s ) => ( population_is_gambusia( ?s ) ) ] ;
+
+        forall_{ ?s : spring } [ remove-manually( ?s ) => ( population_is_gambusia( ?s ) ) ] ;
+
+        forall_{ ?s : spring } [ ( poison( ?s ) + remove-manually( ?s ) + translocate-to( ?s ) ) <= 1 ] ;
+
+    };
+
+}

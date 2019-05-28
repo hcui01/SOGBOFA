@@ -1,0 +1,142 @@
+instance manufacturer_inst_mdp__13 {
+    domain = manufacturer_mdp;
+
+    objects {
+        good : { g0000, g0001, g0100, g0200, g0201 };
+    };
+ 
+    non-fluents {
+        // PROCESSED_TO
+        PROCESSED_TO(g0000, g0100);
+        PROCESSED_TO(g0001, g0100);
+        PROCESSED_TO(g0100, g0200);
+        PROCESSED_TO(g0100, g0200);
+        PROCESSED_TO(g0100, g0201);
+        PROCESSED_TO(g0000, g0201);
+
+
+        // PRICES
+        PRICE(g0000) = 20;
+        PRICE(g0001) = 18;
+        PRICE(g0100) = 65;
+        PRICE(g0200) = 201;
+        PRICE(g0201) = 133;
+
+
+        // PRICE TRENDS
+        PRICE_TREND_CHANGE_PROB(g0000) = 0.05;
+        PRICE_TREND_CHANGE_PROB(g0001) = 0.02;
+        PRICE_TREND_CHANGE_PROB(g0100) = 0.02;
+        PRICE_TREND_CHANGE_PROB(g0200) = 0.06;
+        PRICE_TREND_CHANGE_PROB(g0201) = 0.05;
+
+
+        // PRICE_LEVEL_FACTORS
+        PRICE_LEVEL_FACTOR_level1 = 0.5;
+        PRICE_LEVEL_FACTOR_level2 = 0.6667;
+        PRICE_LEVEL_FACTOR_level3 = 0.8333;
+        PRICE_LEVEL_FACTOR_level4 = 1.0;
+        PRICE_LEVEL_FACTOR_level5 = 1.1667;
+        PRICE_LEVEL_FACTOR_level6 = 1.3333;
+        PRICE_LEVEL_FACTOR_level7 = 1.5;
+
+
+        // PRICE_LEVEL_PROBS
+        PRICE_LEVEL_PROB_down_level1_level1 = 1.0;
+        PRICE_LEVEL_PROB_down_level2_level1 = 0.2;
+        PRICE_LEVEL_PROB_down_level2_level2 = 0.8;
+        PRICE_LEVEL_PROB_down_level3_level2 = 0.2;
+        PRICE_LEVEL_PROB_down_level3_level3 = 0.8;
+        PRICE_LEVEL_PROB_down_level4_level3 = 0.2;
+        PRICE_LEVEL_PROB_down_level4_level4 = 0.8;
+        PRICE_LEVEL_PROB_down_level5_level4 = 0.2;
+        PRICE_LEVEL_PROB_down_level5_level5 = 0.8;
+        PRICE_LEVEL_PROB_down_level6_level5 = 0.2;
+        PRICE_LEVEL_PROB_down_level6_level6 = 0.8;
+        PRICE_LEVEL_PROB_down_level7_level6 = 0.2;
+        PRICE_LEVEL_PROB_down_level7_level7 = 0.8;
+
+        PRICE_LEVEL_PROB_stable_level1_level1 = 0.9;
+        PRICE_LEVEL_PROB_stable_level2_level1 = 0.1;
+        PRICE_LEVEL_PROB_stable_level1_level2 = 0.1;
+        PRICE_LEVEL_PROB_stable_level2_level2 = 0.8;
+        PRICE_LEVEL_PROB_stable_level3_level2 = 0.1;
+        PRICE_LEVEL_PROB_stable_level2_level3 = 0.1;
+        PRICE_LEVEL_PROB_stable_level3_level3 = 0.8;
+        PRICE_LEVEL_PROB_stable_level4_level3 = 0.1;
+        PRICE_LEVEL_PROB_stable_level3_level4 = 0.1;
+        PRICE_LEVEL_PROB_stable_level4_level4 = 0.8;
+        PRICE_LEVEL_PROB_stable_level5_level4 = 0.1;
+        PRICE_LEVEL_PROB_stable_level4_level5 = 0.1;
+        PRICE_LEVEL_PROB_stable_level5_level5 = 0.8;
+        PRICE_LEVEL_PROB_stable_level6_level5 = 0.1;
+        PRICE_LEVEL_PROB_stable_level5_level6 = 0.1;
+        PRICE_LEVEL_PROB_stable_level6_level6 = 0.8;
+        PRICE_LEVEL_PROB_stable_level7_level6 = 0.1;
+        PRICE_LEVEL_PROB_stable_level6_level7 = 0.1;
+        PRICE_LEVEL_PROB_stable_level7_level7 = 0.9;
+
+        PRICE_LEVEL_PROB_up_level1_level1 = 0.8;
+        PRICE_LEVEL_PROB_up_level1_level2 = 0.2;
+        PRICE_LEVEL_PROB_up_level2_level2 = 0.8;
+        PRICE_LEVEL_PROB_up_level2_level3 = 0.2;
+        PRICE_LEVEL_PROB_up_level3_level3 = 0.8;
+        PRICE_LEVEL_PROB_up_level3_level4 = 0.2;
+        PRICE_LEVEL_PROB_up_level4_level4 = 0.8;
+        PRICE_LEVEL_PROB_up_level4_level5 = 0.2;
+        PRICE_LEVEL_PROB_up_level5_level5 = 0.8;
+        PRICE_LEVEL_PROB_up_level5_level6 = 0.2;
+        PRICE_LEVEL_PROB_up_level6_level6 = 0.8;
+        PRICE_LEVEL_PROB_up_level6_level7 = 0.2;
+        PRICE_LEVEL_PROB_up_level7_level7 = 1.0;
+
+
+        // FACTORY
+        MAX_NUM_FACTORIES = 2;
+        BUILD_FACTORY_COST(g0000) = 0;
+        PROB_CONSTRUCTION_DELAY_FACTORY(g0000) = 0.00;
+        BUILD_FACTORY_COST(g0001) = 0;
+        PROB_CONSTRUCTION_DELAY_FACTORY(g0001) = 0.00;
+        BUILD_FACTORY_COST(g0100) = 48;
+        PROB_CONSTRUCTION_DELAY_FACTORY(g0100) = 0.07;
+        BUILD_FACTORY_COST(g0200) = 85;
+        PROB_CONSTRUCTION_DELAY_FACTORY(g0200) = 0.45;
+        BUILD_FACTORY_COST(g0201) = 0;
+        PROB_CONSTRUCTION_DELAY_FACTORY(g0201) = 0.00;
+
+
+        // STAFF
+        // instance with marketing manager
+        SALARY_MARKETING_MANAGER = 16;
+        PROB_MARKETING_MANAGER_APPLIES = 0.60;
+        MARKETING_MANAGER_BONUS = 0.40;
+
+        // instance with lobbyist
+        SALARY_LOBBYIST = 13;
+        PROB_LOBBYIST_APPLIES = 0.57;
+        LOBBYIST_BONUS = 0.14;
+
+        // instance with production manager
+        SALARY_PRODUCTION_MANAGER = 17;
+        PROB_PRODUCTION_MANAGER_APPLIES = 0.17;
+
+    };
+
+    init-state {
+        have-factory(g0201);
+
+        price-trend_is_up(g0000);
+        ~price-trend_is_stable(g0000);
+        price-trend_is_up(g0001);
+        ~price-trend_is_stable(g0001);
+        price-trend_is_stable(g0100);
+        price-trend_is_stable(g0200);
+        price-trend_is_down(g0201);
+        ~price-trend_is_stable(g0201);
+        
+    };
+
+    horizon = 50;
+
+    discount = 1.0;
+}

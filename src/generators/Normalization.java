@@ -21,7 +21,6 @@ public class Normalization {
 		}
 		for(int i = 0; i <= args.length - 2; i ++){
 			File file = new File(outPutDir + args[i] + "_nor");
-            // 路径为文件且不为空则进行删除
             if (file.isFile() && file.exists()) {
                 file.delete();
             }

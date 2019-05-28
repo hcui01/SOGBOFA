@@ -1,0 +1,42 @@
+instance tag_inst_pomdp__1 {
+	domain = tag_pomdp;
+	objects {
+		xpos : {x1,x2,x3};
+		ypos : {y1,y2,y3};
+	};
+	non-fluents {
+		NORTH-ADJ(y1,y2);
+		SOUTH-ADJ(y2,y1);
+		NORTH-ADJ(y2,y3);
+		SOUTH-ADJ(y3,y2);
+
+		EAST-ADJ(x1,x2);
+		WEST-ADJ(x2,x1);
+		EAST-ADJ(x2,x3);
+		WEST-ADJ(x3,x2);
+
+		NORTH(y1,y2);
+		NORTH(y1,y3);
+		SOUTH(y2,y1);
+		NORTH(y2,y3);
+		SOUTH(y3,y2);
+		SOUTH(y3,y1);
+
+		EAST(x1,x2);
+		WEST(x2,x1);
+		EAST(x2,x3);
+		EAST(x1,x3);
+		WEST(x3,x2);
+		WEST(x3,x1);
+
+
+
+	};
+	init-state {
+		robot-at(x3,y1);
+		opp-at(x1,y3);
+	};
+	horizon = 20;
+	discount = 1.0;
+}
+

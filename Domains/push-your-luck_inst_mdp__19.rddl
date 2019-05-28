@@ -1,0 +1,122 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+//                                                                             //
+// RDDL MDP version of Push Your Luck instance #19 for IPC 2018 by Thomas      //
+// Keller (tho.keller [at] unibas.ch).                                         //
+//                                                                             //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+instance push-your-luck_inst_mdp__19 {
+    domain = push-your-luck_mdp;
+
+    objects {
+        die : { d1, d2, d3, d4, d5 };
+    };
+
+    non-fluents {
+        // reward factor between 0.5 and 2.0, each factor comes up 5 times
+        VALUE_1 = 0.5;
+        VALUE_2 = 1.0;
+        VALUE_3 = 1.5;
+        VALUE_4 = 2.0;
+        VALUE_5 = 0.5;
+        VALUE_6 = 1.0;
+        VALUE_7 = 1.5;
+        VALUE_8 = 2.0;
+        VALUE_9 = 0.5;
+        VALUE_10 = 1.0;
+        VALUE_11 = 1.5;
+        VALUE_12 = 2.0;
+        VALUE_13 = 0.5;
+        VALUE_14 = 1.0;
+        VALUE_15 = 1.5;
+        VALUE_16 = 2.0;
+        VALUE_17 = 0.5;
+        VALUE_18 = 1.0;
+        VALUE_19 = 1.5;
+        VALUE_20 = 2.0;
+
+        // fair 10-sided die (with more faces with reward
+        // factor of 0.5 or 1.0)
+        PROB_1(d1) = 0.1;
+        PROB_2(d1) = 0.1;
+        PROB_3(d1) = 0.1;
+        PROB_4(d1) = 0.1;
+        PROB_5(d1) = 0.1;
+        PROB_6(d1) = 0.1;
+        PROB_7(d1) = 0.1;
+        PROB_8(d1) = 0.1;
+        PROB_9(d1) = 0.1;
+        PROB_10(d1) = 0.1;
+
+        // fair 10-sided die (with more faces with reward
+        // factor of 0.5 or 1.0)
+        PROB_1(d2) = 0.1;
+        PROB_2(d2) = 0.1;
+        PROB_3(d2) = 0.1;
+        PROB_4(d2) = 0.1;
+        PROB_5(d2) = 0.1;
+        PROB_6(d2) = 0.1;
+        PROB_7(d2) = 0.1;
+        PROB_8(d2) = 0.1;
+        PROB_9(d2) = 0.1;
+        PROB_10(d2) = 0.1;
+
+        // fair 10-sided die (with more faces with reward
+        // factor of 1.5 or 2.0)
+        PROB_11(d3) = 0.1;
+        PROB_12(d3) = 0.1;
+        PROB_13(d3) = 0.1;
+        PROB_14(d3) = 0.1;
+        PROB_15(d3) = 0.1;
+        PROB_16(d3) = 0.1;
+        PROB_17(d3) = 0.1;
+        PROB_18(d3) = 0.1;
+        PROB_19(d3) = 0.1;
+        PROB_20(d3) = 0.1;
+
+        // fair 10-sided die (with more faces with reward
+        // factor of 1.5 or 2.0)
+        PROB_11(d4) = 0.1;
+        PROB_12(d4) = 0.1;
+        PROB_13(d4) = 0.1;
+        PROB_14(d4) = 0.1;
+        PROB_15(d4) = 0.1;
+        PROB_16(d4) = 0.1;
+        PROB_17(d4) = 0.1;
+        PROB_18(d4) = 0.1;
+        PROB_19(d4) = 0.1;
+        PROB_20(d4) = 0.1;
+
+        // fair 20-sided die
+        PROB_1(d5) = 0.05;
+        PROB_2(d5) = 0.05;
+        PROB_3(d5) = 0.05;
+        PROB_4(d5) = 0.05;
+        PROB_5(d5) = 0.05;
+        PROB_6(d5) = 0.05;
+        PROB_7(d5) = 0.05;
+        PROB_8(d5) = 0.05;
+        PROB_9(d5) = 0.05;
+        PROB_10(d5) = 0.05;
+        PROB_11(d5) = 0.05;
+        PROB_12(d5) = 0.05;
+        PROB_13(d5) = 0.05;
+        PROB_14(d5) = 0.05;
+        PROB_15(d5) = 0.05;
+        PROB_16(d5) = 0.05;
+        PROB_17(d5) = 0.05;
+        PROB_18(d5) = 0.05;
+        PROB_19(d5) = 0.05;
+        PROB_20(d5) = 0.05;
+    };
+
+    init-state {
+        ~die-value-seen_1;
+    };
+
+    horizon = 40;
+
+    discount = 1.0;
+}

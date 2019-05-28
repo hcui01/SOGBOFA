@@ -1,0 +1,76 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+//                                                                             //
+// RDDL MDP version of Chromatic Dice instance #15 for IPC 2018 by Thomas      //
+// Keller (tho.keller [at] unibas.ch).                                         //
+//                                                                             //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+instance chromatic-dice_inst_mdp__15 {
+    domain = chromatic-dice_mdp;
+
+    objects {
+        die : {d1, d2, d3, d4, d5};
+    };
+
+    non-fluents {
+        // VALUE_PROB
+        VALUE_PROB_1 = 0.166666666;
+        VALUE_PROB_2 = 0.166666667;
+        VALUE_PROB_3 = 0.166666667;
+        VALUE_PROB_4 = 0.166666667;
+        VALUE_PROB_5 = 0.166666667;
+        VALUE_PROB_6 = 0.166666666;
+
+        // COLOR_PROB
+        COLOR_PROB_red = 0.2;
+        COLOR_PROB_blue = 0.2;
+        COLOR_PROB_green = 0.2;
+        COLOR_PROB_yellow = 0.2;
+        COLOR_PROB_purple = 0.2;
+
+        // BONUS_PROB_VALUE_PART
+        BONUS_PROB_VALUE_PART_1 = 0.0;
+        BONUS_PROB_VALUE_PART_2 = 0.0;
+        BONUS_PROB_VALUE_PART_3 = 0.0;
+        BONUS_PROB_VALUE_PART_4 = 1.0;
+        BONUS_PROB_VALUE_PART_5 = 1.0;
+        BONUS_PROB_VALUE_PART_6 = 1.0;
+
+        // BONUS_PROB_COLOR_PART
+        BONUS_PROB_COLOR_PART_1 = 0.0;
+        BONUS_PROB_COLOR_PART_2 = 0.0;
+        BONUS_PROB_COLOR_PART_3 = 0.0;
+        BONUS_PROB_COLOR_PART_4 = 1.0;
+        BONUS_PROB_COLOR_PART_5 = 1.0;
+        BONUS_PROB_COLOR_PART_6 = 1.0;
+
+        // BONUS_VALUE_PART
+        BONUS_VALUE_PART_1 = 45;
+        BONUS_VALUE_PART_2 = 45;
+        BONUS_VALUE_PART_3 = 45;
+        BONUS_VALUE_PART_4 = 45;
+        BONUS_VALUE_PART_5 = 45;
+        BONUS_VALUE_PART_6 = 45;
+
+        // BONUS_COLOR_PART
+        BONUS_COLOR_PART_1 = 40;
+        BONUS_COLOR_PART_2 = 40;
+        BONUS_COLOR_PART_3 = 40;
+        BONUS_COLOR_PART_4 = 40;
+        BONUS_COLOR_PART_5 = 40;
+        BONUS_COLOR_PART_6 = 40;
+    };
+
+    init-state {
+        // just to make rddlsim happy (which neither allows an empty init-state
+        // section nor omitting the section entirely)
+        receive-value-bonus = false;
+    };
+
+    // horizon is four times the number of remaining categories + 2 steps for the boni
+    horizon = 98;
+
+    discount = 1.0;
+}

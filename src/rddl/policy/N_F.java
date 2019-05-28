@@ -2,7 +2,6 @@ package rddl.policy;
 
 
 import rddl.competition.Records;
-import rddl.competition.Team3;
 
 import java.lang.reflect.Array;
 import java.util.*;

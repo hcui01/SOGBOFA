@@ -50,7 +50,6 @@ import rddl.State;
 import rddl.parser.ParseException;
 import rddl.parser.parser;
 import rddl.policy.Policy;
-import rddl.policy.RandomEnumPolicy;
 import rddl.viz.StateViz;
 /** The SocketClient class is a simple example of a TCP/IP Socket Client.
  *

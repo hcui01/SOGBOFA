@@ -3,7 +3,7 @@ import java.util.*;
 
 public class CalComn {
 	public static void main(String[] args) throws Exception {
-		Scanner in = new Scanner(System.in);    //Scanner¿‡
+		Scanner in = new Scanner(System.in);    //Scanne
 		while(true){
 			ArrayList<Double> comb = new ArrayList<Double>();
 			double numInTotal = 0;

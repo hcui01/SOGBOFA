@@ -1,0 +1,70 @@
+
+instance elevators_inst_mdp__15 { 
+	domain = elevators_mdp; 
+ 	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20,f21,f22,f23 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.0055914675;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.0042450493;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.009688112;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.012132186;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.012260593;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.008028266;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.012368062;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.008051138;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.005399406;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.008329914;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.0077754403;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.006367601;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.004918488;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.008818574;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.0057872;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.009780309;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.010301252;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.010380245;
+		ADJACENT-UP(f18,f19) = true;
+		ARRIVE-PARAM(f19) = 0.012128353;
+		ADJACENT-UP(f19,f20) = true;
+		ARRIVE-PARAM(f20) = 0.011412516;
+		ADJACENT-UP(f20,f21) = true;
+		ARRIVE-PARAM(f21) = 0.007430933;
+		ADJACENT-UP(f21,f22) = true;
+		ARRIVE-PARAM(f22) = 0.00900711;
+		ADJACENT-UP(f22,f23) = true;
+		TOP-FLOOR(f23) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+	};
+
+	horizon = 40;
+	discount = 1.0;
+} 

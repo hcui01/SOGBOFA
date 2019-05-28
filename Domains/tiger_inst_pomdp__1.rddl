@@ -1,0 +1,12 @@
+instance tiger_inst_pomdp__1 {
+	domain = tiger_pomdp;
+
+
+	init-state {
+		left = false;
+
+	};
+	horizon = 3;
+	discount = 1.0;
+}
+

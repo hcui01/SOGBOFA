@@ -1,0 +1,106 @@
+domain tag_pomdp {
+	requirements = {
+		reward-deterministic,
+//		constrained-state,
+		partially-observed
+	};
+	
+	types {
+		xpos : object;
+		ypos : object;
+	};
+
+	pvariables {
+
+		NORTH(ypos, ypos): {non-fluent, bool, default = false};
+		SOUTH(ypos, ypos): {non-fluent, bool, default = false};
+		EAST(xpos, xpos): {non-fluent, bool, default = false};
+		WEST(xpos, xpos): {non-fluent, bool, default = false};
+		
+		NORTH-ADJ(ypos, ypos): {non-fluent, bool, default = false};
+		SOUTH-ADJ(ypos, ypos): {non-fluent, bool, default = false};
+		EAST-ADJ(xpos, xpos): {non-fluent, bool, default = false};
+		WEST-ADJ(xpos, xpos): {non-fluent, bool, default = false};
+
+		HIGH-PROB: {non-fluent, real, default = 0.4};
+		LOW-PROB : {non-fluent, real, default = 0.2}; 
+
+		TAG-REWARD : {non-fluent, real, default = 10.0};
+		ACTION-COST : {non-fluent, real, default = 1.0};
+
+		// Fluents
+		robot-at(xpos, ypos) : {state-fluent, bool, default = false};
+		opp-at(xpos, ypos) : {state-fluent, bool, default = false};		
+		// Observations
+		same-loc(xpos, ypos) : { observ-fluent, bool };
+		robot-at-obs(xpos, ypos) : { observ-fluent, bool };
+
+		// Actions
+		move-north : {action-fluent, bool, default = false};
+		move-south : {action-fluent, bool, default = false};
+		move-east : {action-fluent, bool, default = false};
+		move-west : {action-fluent, bool, default = false};
+		tag : {action-fluent, bool, default = false};
+	};
+	
+	cpfs {
+		
+		robot-at'(?x, ?y) = if (tag)
+				then KronDelta( robot-at(?x, ?y) )
+			  else if ( move-north ^ exists_{?y2 : ypos} [ NORTH-ADJ(?y2,?y) ^ robot-at(?x,?y2)] )
+			then 
+				KronDelta(true) // robot moves to this location
+			else if ( move-north ^ exists_{?y2 : ypos} [ NORTH-ADJ(?y,?y2) ^ robot-at(?x,?y) ] )
+			then 
+				KronDelta(false) // robot leaves this location
+			else if ( move-south ^ exists_{?y2 : ypos} [ SOUTH-ADJ(?y2,?y) ^ robot-at(?x,?y2)] )
+			then 
+				KronDelta(true) // robot moves to this location
+			else if ( move-south ^ exists_{?y2 : ypos} [ SOUTH-ADJ(?y,?y2) ^ robot-at(?x,?y) ] )
+			then 
+				KronDelta(false) // robot leaves this location
+			else if ( move-east ^ exists_{?x2 : xpos} [ EAST-ADJ(?x2,?x) ^ robot-at(?x2,?y) ] )
+			then 
+				KronDelta(true) // robot moves to this location
+			else if ( move-east ^ exists_{?x2 : xpos} [ EAST-ADJ(?x,?x2) ^ robot-at(?x,?y) ] )
+			then 
+				KronDelta(false) // robot leaves this location
+			else if ( move-west ^ exists_{?x2 : xpos} [ WEST-ADJ(?x2,?x) ^ robot-at(?x2,?y) ] )
+			then 
+				KronDelta(true) // robot moves to this location
+			else if ( move-west ^ exists_{?x2 : xpos} [ WEST-ADJ(?x,?x2) ^ robot-at(?x,?y) ] )
+			then 
+				KronDelta(false) // robot leaves this location
+				
+			// A noop or illegal movement, so state unchanged
+			else 
+				KronDelta( robot-at(?x,?y) );
+			
+		opp-at'(?x, ?y) =
+
+			Bernoulli(
+[exists_{?x2 : xpos}  EAST-ADJ(?x2,?x) ^ opp-at(?x2,?y) ^ exists_{?x3 : xpos} [ EAST(?x3,?x2) ^ robot-at(?x3,?y) ]] * HIGH-PROB + 
+[exists_{?x2 : xpos}  EAST-ADJ(?x2,?x) ^ opp-at(?x2,?y) ^ exists_{?y2 : ypos} [ robot-at(?x2,?y2) ]] * LOW-PROB + 
+[exists_{?x2 : xpos}  WEST-ADJ(?x2,?x) ^ opp-at(?x2,?y) ^ exists_{?x3 : xpos} [ WEST(?x3,?x2) ^ robot-at(?x3,?y) ]] * HIGH-PROB + 
+[exists_{?x2 : xpos}  WEST-ADJ(?x2,?x) ^ opp-at(?x2,?y) ^ exists_{?y2 : ypos} [ robot-at(?x2,?y2) ]] * LOW-PROB +
+[exists_{?y2 : ypos}  NORTH-ADJ(?y2,?y) ^ opp-at(?x,?y2) ^ exists_{?y3 : ypos} [ NORTH(?y3,?y2) ^ robot-at(?x,?y3) ]] * HIGH-PROB + 
+[exists_{?y2 : ypos}  NORTH-ADJ(?y2,?y) ^ opp-at(?x,?y2) ^ exists_{?x2 : xpos} [ robot-at(?x2,?y2) ]] * LOW-PROB + 
+[exists_{?y2 : ypos}  SOUTH-ADJ(?y2,?y) ^ opp-at(?x,?y2) ^ exists_{?y3 : ypos} [ SOUTH(?y3,?y2) ^ robot-at(?x,?y3) ]] * HIGH-PROB + 
+[exists_{?y2 : ypos}  SOUTH-ADJ(?y2,?y) ^ opp-at(?x,?y2) ^ exists_{?x2 : xpos} [ robot-at(?x2,?y2) ]] * LOW-PROB );
+
+		robot-at-obs(?x, ?y) = KronDelta( robot-at'(?x, ?y) );
+		same-loc(?x, ?y) = KronDelta( exists_{?x : xpos, ?y : ypos} [robot-at'(?x, ?y) ^ opp-at'(?x,?y)] );
+	};
+	
+		reward = (if (tag ^ exists_{?x : xpos, ?y : ypos} [ robot-at(?x,?y) ^ opp-at(?x, ?y) ])
+			then TAG-REWARD
+		   else if (tag ^ ~exists_{?x : xpos, ?y : ypos} [ robot-at(?x,?y) ^ opp-at(?x, ?y) ])
+			then -TAG-REWARD
+		   else -ACTION-COST);
+	
+	action-preconditions {
+        move-north + move-south + move-east + move-west + tag <= 1;
+    };
+	
+}
+

@@ -1,0 +1,121 @@
+/////////////////////////////////////////////////////////////////////////////////
+//                                                                             //
+//                                                                             //
+// RDDL MDP version of Earth Observation instance #01 for IPC 2018 by Thomas   //
+// Keller (tho.keller [at] unibas.ch), based on a domain that was created for  //
+// the paper "An Experimental Comparison of Classical, FOND and Probabilistic  //
+// Planning" by Andreas Hertle, Christian Dornhege, Thomas Keller, Robert      //
+// Mattmüller, Manuela Ortlieb, and Bernhard Nebel (KI 2014).                  //
+//                                                                             //
+//                                                                             //
+/////////////////////////////////////////////////////////////////////////////////
+
+instance earth-observation_inst_mdp__01 {
+    domain = earth-observation_mdp;
+
+    objects {
+        patch : { p0101, p0102, p0103, p0104,
+                  p0201, p0202, p0203, p0204,
+                  p0301, p0302, p0303, p0304,
+                  p0401, p0402, p0403, p0404 };
+    };
+
+    non-fluents {
+        FAILURE_PROB_HIGH_VIS = 0.049464;
+        FAILURE_PROB_MEDIUM_VIS = 0.114411;
+        FAILURE_PROB_LOW_VIS = 1.000000;
+
+        HIGH_TO_MEDIUM_VIS = 0.178733;
+        HIGH_TO_LOW_VIS = 0.020000;
+
+        MEDIUM_TO_HIGH_VIS = 0.102450;
+        MEDIUM_TO_LOW_VIS = 0.097493;
+
+        LOW_TO_MEDIUM_VIS = 0.227234;
+        LOW_TO_HIGH_VIS = 0.020000;
+
+        CONNECTED_north-east(p0101, p0202);
+        CONNECTED_east(p0101, p0201);
+
+        CONNECTED_north-east(p0102, p0203);
+        CONNECTED_east(p0102, p0202);
+        CONNECTED_south-east(p0102, p0201);
+
+        CONNECTED_north-east(p0103, p0204);
+        CONNECTED_east(p0103, p0203);
+        CONNECTED_south-east(p0103, p0202);
+
+        CONNECTED_east(p0104, p0204);
+        CONNECTED_south-east(p0104, p0203);
+
+        CONNECTED_north-east(p0201, p0302);
+        CONNECTED_east(p0201, p0301);
+
+        CONNECTED_north-east(p0202, p0303);
+        CONNECTED_east(p0202, p0302);
+        CONNECTED_south-east(p0202, p0301);
+
+        CONNECTED_north-east(p0203, p0304);
+        CONNECTED_east(p0203, p0303);
+        CONNECTED_south-east(p0203, p0302);
+
+        CONNECTED_east(p0204, p0304);
+        CONNECTED_south-east(p0204, p0303);
+
+        CONNECTED_north-east(p0301, p0402);
+        CONNECTED_east(p0301, p0401);
+
+        CONNECTED_north-east(p0302, p0403);
+        CONNECTED_east(p0302, p0402);
+        CONNECTED_south-east(p0302, p0401);
+
+        CONNECTED_north-east(p0303, p0404);
+        CONNECTED_east(p0303, p0403);
+        CONNECTED_south-east(p0303, p0402);
+
+        CONNECTED_east(p0304, p0404);
+        CONNECTED_south-east(p0304, p0403);
+
+        CONNECTED_north-east(p0401, p0102);
+        CONNECTED_east(p0401, p0101);
+
+        CONNECTED_north-east(p0402, p0103);
+        CONNECTED_east(p0402, p0102);
+        CONNECTED_south-east(p0402, p0101);
+
+        CONNECTED_north-east(p0403, p0104);
+        CONNECTED_east(p0403, p0103);
+        CONNECTED_south-east(p0403, p0102);
+
+        CONNECTED_east(p0404, p0104);
+        CONNECTED_south-east(p0404, p0103);
+
+
+    };
+
+    init-state {
+        is-focal-point(p0103);
+        visibility_is_high(p0102);
+        ~visibility_is_medium(p0102);
+        visibility_is_high(p0103);
+        ~visibility_is_medium(p0103);
+        visibility_is_high(p0104);
+        ~visibility_is_medium(p0104);
+        visibility_is_high(p0201);
+        ~visibility_is_medium(p0201);
+        visibility_is_high(p0202);
+        ~visibility_is_medium(p0202);
+        visibility_is_high(p0204);
+        ~visibility_is_medium(p0204);
+        is-target(p0301);
+        visibility_is_high(p0303);
+        ~visibility_is_medium(p0303);
+        visibility_is_high(p0304);
+        ~visibility_is_medium(p0304);
+        visibility_is_high(p0403);
+        ~visibility_is_medium(p0403);
+
+    };
+    horizon = 32;
+    discount = 1.0;
+}

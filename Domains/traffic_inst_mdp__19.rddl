@@ -1,0 +1,229 @@
+instance traffic_inst_mdp__19 {
+	domain = traffic_mdp;
+	objects {
+		intersection : {ia15a15,ia15a5,ia15a7,ia15a3,ia5a15,ia5a5,ia5a7,ia5a3,ia7a15,ia7a5,ia7a7,ia7a3,ia3a15,ia3a5,ia3a7,ia3a3};
+		cell : {ca15a1,ca1a15,ca15a2,ca2a15,ca15a4,ca4a15,ca15a6,ca6a15,ca15a8,ca8a15,ca15a9,ca9a15,ca15a10,ca10a15,ca15a11,ca11a15,ca15a12,ca12a15,ca15a13,ca13a15,ca15a14,ca14a15,ca15a16,ca16a15,ca15a17,ca17a15,ca5a1,ca1a5,ca5a2,ca2a5,ca5a4,ca4a5,ca5a6,ca6a5,ca5a8,ca8a5,ca5a9,ca9a5,ca5a10,ca10a5,ca5a11,ca11a5,ca5a12,ca12a5,ca5a13,ca13a5,ca5a14,ca14a5,ca5a16,ca16a5,ca5a17,ca17a5,ca7a1,ca1a7,ca7a2,ca2a7,ca7a4,ca4a7,ca7a6,ca6a7,ca7a8,ca8a7,ca7a9,ca9a7,ca7a10,ca10a7,ca7a11,ca11a7,ca7a12,ca12a7,ca7a13,ca13a7,ca7a14,ca14a7,ca7a16,ca16a7,ca7a17,ca17a7,ca3a1,ca1a3,ca3a2,ca2a3,ca3a4,ca4a3,ca3a6,ca6a3,ca3a8,ca8a3,ca3a9,ca9a3,ca3a10,ca10a3,ca3a11,ca11a3,ca3a12,ca12a3,ca3a13,ca13a3,ca3a14,ca14a3,ca3a16,ca16a3,ca3a17,ca17a3};
+	};
+	non-fluents {
+
+		PERIMETER-INPUT-CELL(ca15a1);
+		PERIMETER-INPUT-CELL(ca1a15);
+
+		PERIMETER-INPUT-CELL(ca5a1);
+		PERIMETER-INPUT-CELL(ca1a5);
+
+		PERIMETER-INPUT-CELL(ca7a1);
+		PERIMETER-INPUT-CELL(ca1a7);
+
+		PERIMETER-INPUT-CELL(ca3a1);
+		PERIMETER-INPUT-CELL(ca1a3);
+
+		PERIMETER-INPUT-RATE(ca15a1) = 0.33991164;
+		PERIMETER-INPUT-RATE(ca1a15) = 0.33026525;
+
+		PERIMETER-INPUT-RATE(ca5a1) = 0.4237145;
+		PERIMETER-INPUT-RATE(ca1a5) = 0.42094502;
+
+		PERIMETER-INPUT-RATE(ca7a1) = 0.34306535;
+		PERIMETER-INPUT-RATE(ca1a7) = 0.46584636;
+
+		PERIMETER-INPUT-RATE(ca3a1) = 0.43381172;
+		PERIMETER-INPUT-RATE(ca1a3) = 0.3994093;
+
+		PERIMETER-EXIT-CELL(ca15a17);
+		PERIMETER-EXIT-CELL(ca17a15);
+
+		PERIMETER-EXIT-CELL(ca5a17);
+		PERIMETER-EXIT-CELL(ca17a5);
+
+		PERIMETER-EXIT-CELL(ca7a17);
+		PERIMETER-EXIT-CELL(ca17a7);
+
+		PERIMETER-EXIT-CELL(ca3a17);
+		PERIMETER-EXIT-CELL(ca17a3);
+
+		FLOWS-INTO-INTERSECTION-EW(ca15a14,ia15a15);
+		FLOWS-INTO-INTERSECTION-NS(ca14a15,ia15a15);
+
+		FLOWS-INTO-INTERSECTION-EW(ca15a4,ia15a5);
+		FLOWS-INTO-INTERSECTION-NS(ca14a5,ia15a5);
+
+		FLOWS-INTO-INTERSECTION-EW(ca15a6,ia15a7);
+		FLOWS-INTO-INTERSECTION-NS(ca14a7,ia15a7);
+
+		FLOWS-INTO-INTERSECTION-EW(ca15a2,ia15a3);
+		FLOWS-INTO-INTERSECTION-NS(ca14a3,ia15a3);
+
+		FLOWS-INTO-INTERSECTION-EW(ca5a14,ia5a15);
+		FLOWS-INTO-INTERSECTION-NS(ca4a15,ia5a15);
+
+		FLOWS-INTO-INTERSECTION-EW(ca5a4,ia5a5);
+		FLOWS-INTO-INTERSECTION-NS(ca4a5,ia5a5);
+
+		FLOWS-INTO-INTERSECTION-EW(ca5a6,ia5a7);
+		FLOWS-INTO-INTERSECTION-NS(ca4a7,ia5a7);
+
+		FLOWS-INTO-INTERSECTION-EW(ca5a2,ia5a3);
+		FLOWS-INTO-INTERSECTION-NS(ca4a3,ia5a3);
+
+		FLOWS-INTO-INTERSECTION-EW(ca7a14,ia7a15);
+		FLOWS-INTO-INTERSECTION-NS(ca6a15,ia7a15);
+
+		FLOWS-INTO-INTERSECTION-EW(ca7a4,ia7a5);
+		FLOWS-INTO-INTERSECTION-NS(ca6a5,ia7a5);
+
+		FLOWS-INTO-INTERSECTION-EW(ca7a6,ia7a7);
+		FLOWS-INTO-INTERSECTION-NS(ca6a7,ia7a7);
+
+		FLOWS-INTO-INTERSECTION-EW(ca7a2,ia7a3);
+		FLOWS-INTO-INTERSECTION-NS(ca6a3,ia7a3);
+
+		FLOWS-INTO-INTERSECTION-EW(ca3a14,ia3a15);
+		FLOWS-INTO-INTERSECTION-NS(ca2a15,ia3a15);
+
+		FLOWS-INTO-INTERSECTION-EW(ca3a4,ia3a5);
+		FLOWS-INTO-INTERSECTION-NS(ca2a5,ia3a5);
+
+		FLOWS-INTO-INTERSECTION-EW(ca3a6,ia3a7);
+		FLOWS-INTO-INTERSECTION-NS(ca2a7,ia3a7);
+
+		FLOWS-INTO-INTERSECTION-EW(ca3a2,ia3a3);
+		FLOWS-INTO-INTERSECTION-NS(ca2a3,ia3a3);
+
+		FLOWS-INTO-CELL(ca15a1,ca15a2);
+		FLOWS-INTO-CELL(ca1a15,ca2a15);
+		FLOWS-INTO-CELL(ca15a2,ca15a4);
+		FLOWS-INTO-CELL(ca2a15,ca4a15);
+		FLOWS-INTO-CELL(ca15a4,ca15a6);
+		FLOWS-INTO-CELL(ca4a15,ca6a15);
+		FLOWS-INTO-CELL(ca15a6,ca15a8);
+		FLOWS-INTO-CELL(ca6a15,ca8a15);
+		FLOWS-INTO-CELL(ca15a8,ca15a9);
+		FLOWS-INTO-CELL(ca8a15,ca9a15);
+		FLOWS-INTO-CELL(ca15a9,ca15a10);
+		FLOWS-INTO-CELL(ca9a15,ca10a15);
+		FLOWS-INTO-CELL(ca15a10,ca15a11);
+		FLOWS-INTO-CELL(ca10a15,ca11a15);
+		FLOWS-INTO-CELL(ca15a11,ca15a12);
+		FLOWS-INTO-CELL(ca11a15,ca12a15);
+		FLOWS-INTO-CELL(ca15a12,ca15a13);
+		FLOWS-INTO-CELL(ca12a15,ca13a15);
+		FLOWS-INTO-CELL(ca15a13,ca15a14);
+		FLOWS-INTO-CELL(ca13a15,ca14a15);
+		FLOWS-INTO-CELL(ca15a14,ca15a16);
+		FLOWS-INTO-CELL(ca14a15,ca16a15);
+		FLOWS-INTO-CELL(ca15a16,ca15a17);
+		FLOWS-INTO-CELL(ca16a15,ca17a15);
+		FLOWS-INTO-CELL(ca5a1,ca5a2);
+		FLOWS-INTO-CELL(ca1a5,ca2a5);
+		FLOWS-INTO-CELL(ca5a2,ca5a4);
+		FLOWS-INTO-CELL(ca2a5,ca4a5);
+		FLOWS-INTO-CELL(ca5a4,ca5a6);
+		FLOWS-INTO-CELL(ca4a5,ca6a5);
+		FLOWS-INTO-CELL(ca5a6,ca5a8);
+		FLOWS-INTO-CELL(ca6a5,ca8a5);
+		FLOWS-INTO-CELL(ca5a8,ca5a9);
+		FLOWS-INTO-CELL(ca8a5,ca9a5);
+		FLOWS-INTO-CELL(ca5a9,ca5a10);
+		FLOWS-INTO-CELL(ca9a5,ca10a5);
+		FLOWS-INTO-CELL(ca5a10,ca5a11);
+		FLOWS-INTO-CELL(ca10a5,ca11a5);
+		FLOWS-INTO-CELL(ca5a11,ca5a12);
+		FLOWS-INTO-CELL(ca11a5,ca12a5);
+		FLOWS-INTO-CELL(ca5a12,ca5a13);
+		FLOWS-INTO-CELL(ca12a5,ca13a5);
+		FLOWS-INTO-CELL(ca5a13,ca5a14);
+		FLOWS-INTO-CELL(ca13a5,ca14a5);
+		FLOWS-INTO-CELL(ca5a14,ca5a16);
+		FLOWS-INTO-CELL(ca14a5,ca16a5);
+		FLOWS-INTO-CELL(ca5a16,ca5a17);
+		FLOWS-INTO-CELL(ca16a5,ca17a5);
+		FLOWS-INTO-CELL(ca7a1,ca7a2);
+		FLOWS-INTO-CELL(ca1a7,ca2a7);
+		FLOWS-INTO-CELL(ca7a2,ca7a4);
+		FLOWS-INTO-CELL(ca2a7,ca4a7);
+		FLOWS-INTO-CELL(ca7a4,ca7a6);
+		FLOWS-INTO-CELL(ca4a7,ca6a7);
+		FLOWS-INTO-CELL(ca7a6,ca7a8);
+		FLOWS-INTO-CELL(ca6a7,ca8a7);
+		FLOWS-INTO-CELL(ca7a8,ca7a9);
+		FLOWS-INTO-CELL(ca8a7,ca9a7);
+		FLOWS-INTO-CELL(ca7a9,ca7a10);
+		FLOWS-INTO-CELL(ca9a7,ca10a7);
+		FLOWS-INTO-CELL(ca7a10,ca7a11);
+		FLOWS-INTO-CELL(ca10a7,ca11a7);
+		FLOWS-INTO-CELL(ca7a11,ca7a12);
+		FLOWS-INTO-CELL(ca11a7,ca12a7);
+		FLOWS-INTO-CELL(ca7a12,ca7a13);
+		FLOWS-INTO-CELL(ca12a7,ca13a7);
+		FLOWS-INTO-CELL(ca7a13,ca7a14);
+		FLOWS-INTO-CELL(ca13a7,ca14a7);
+		FLOWS-INTO-CELL(ca7a14,ca7a16);
+		FLOWS-INTO-CELL(ca14a7,ca16a7);
+		FLOWS-INTO-CELL(ca7a16,ca7a17);
+		FLOWS-INTO-CELL(ca16a7,ca17a7);
+		FLOWS-INTO-CELL(ca3a1,ca3a2);
+		FLOWS-INTO-CELL(ca1a3,ca2a3);
+		FLOWS-INTO-CELL(ca3a2,ca3a4);
+		FLOWS-INTO-CELL(ca2a3,ca4a3);
+		FLOWS-INTO-CELL(ca3a4,ca3a6);
+		FLOWS-INTO-CELL(ca4a3,ca6a3);
+		FLOWS-INTO-CELL(ca3a6,ca3a8);
+		FLOWS-INTO-CELL(ca6a3,ca8a3);
+		FLOWS-INTO-CELL(ca3a8,ca3a9);
+		FLOWS-INTO-CELL(ca8a3,ca9a3);
+		FLOWS-INTO-CELL(ca3a9,ca3a10);
+		FLOWS-INTO-CELL(ca9a3,ca10a3);
+		FLOWS-INTO-CELL(ca3a10,ca3a11);
+		FLOWS-INTO-CELL(ca10a3,ca11a3);
+		FLOWS-INTO-CELL(ca3a11,ca3a12);
+		FLOWS-INTO-CELL(ca11a3,ca12a3);
+		FLOWS-INTO-CELL(ca3a12,ca3a13);
+		FLOWS-INTO-CELL(ca12a3,ca13a3);
+		FLOWS-INTO-CELL(ca3a13,ca3a14);
+		FLOWS-INTO-CELL(ca13a3,ca14a3);
+		FLOWS-INTO-CELL(ca3a14,ca3a16);
+		FLOWS-INTO-CELL(ca14a3,ca16a3);
+		FLOWS-INTO-CELL(ca3a16,ca3a17);
+		FLOWS-INTO-CELL(ca16a3,ca17a3);
+	};
+	init-state {
+		occupied(ca15a1);
+		occupied(ca1a15);
+		occupied(ca2a15);
+		occupied(ca15a4);
+		occupied(ca15a11);
+		occupied(ca12a15);
+		occupied(ca15a13);
+		occupied(ca15a14);
+		occupied(ca5a2);
+		occupied(ca4a5);
+		occupied(ca5a6);
+		occupied(ca5a8);
+		occupied(ca8a5);
+		occupied(ca5a10);
+		occupied(ca11a5);
+		occupied(ca12a5);
+		occupied(ca5a13);
+		occupied(ca5a16);
+		occupied(ca16a5);
+		occupied(ca5a17);
+		occupied(ca17a5);
+		occupied(ca2a7);
+		occupied(ca4a7);
+		occupied(ca7a6);
+		occupied(ca6a7);
+		occupied(ca7a9);
+		occupied(ca9a7);
+		occupied(ca11a7);
+		occupied(ca7a13);
+		occupied(ca2a3);
+		occupied(ca4a3);
+		occupied(ca3a8);
+		occupied(ca3a9);
+		occupied(ca13a3);
+	};
+	horizon  = 40;
+	discount = 0.9;
+}
+

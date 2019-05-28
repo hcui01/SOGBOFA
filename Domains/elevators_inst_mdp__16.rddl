@@ -1,0 +1,79 @@
+
+instance elevators_inst_mdp__16 { 
+	domain = elevators_mdp; 
+ 	objects { 
+		elevator : {e0,e1,e2,e3,e4,e5,e6};
+		floor : {f0,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20,f21,f22,f23,f24,f25,f26,f27 }; 
+	}; 
+	non-fluents {
+		ELEVATOR-PENALTY-RIGHT-DIR = 0.75;
+		ELEVATOR-PENALTY-WRONG-DIR = 3.0;
+		ADJACENT-UP(f0,f1) = true;
+		ARRIVE-PARAM(f1) = 0.0051100883;
+		ADJACENT-UP(f1,f2) = true;
+		ARRIVE-PARAM(f2) = 0.006839239;
+		ADJACENT-UP(f2,f3) = true;
+		ARRIVE-PARAM(f3) = 0.0036352582;
+		ADJACENT-UP(f3,f4) = true;
+		ARRIVE-PARAM(f4) = 0.005707073;
+		ADJACENT-UP(f4,f5) = true;
+		ARRIVE-PARAM(f5) = 0.0076278634;
+		ADJACENT-UP(f5,f6) = true;
+		ARRIVE-PARAM(f6) = 0.008433109;
+		ADJACENT-UP(f6,f7) = true;
+		ARRIVE-PARAM(f7) = 0.010199321;
+		ADJACENT-UP(f7,f8) = true;
+		ARRIVE-PARAM(f8) = 0.0058389637;
+		ADJACENT-UP(f8,f9) = true;
+		ARRIVE-PARAM(f9) = 0.0046501467;
+		ADJACENT-UP(f9,f10) = true;
+		ARRIVE-PARAM(f10) = 0.008151851;
+		ADJACENT-UP(f10,f11) = true;
+		ARRIVE-PARAM(f11) = 0.007533509;
+		ADJACENT-UP(f11,f12) = true;
+		ARRIVE-PARAM(f12) = 0.0099862125;
+		ADJACENT-UP(f12,f13) = true;
+		ARRIVE-PARAM(f13) = 0.0038448742;
+		ADJACENT-UP(f13,f14) = true;
+		ARRIVE-PARAM(f14) = 0.0055776536;
+		ADJACENT-UP(f14,f15) = true;
+		ARRIVE-PARAM(f15) = 0.00894335;
+		ADJACENT-UP(f15,f16) = true;
+		ARRIVE-PARAM(f16) = 0.007956;
+		ADJACENT-UP(f16,f17) = true;
+		ARRIVE-PARAM(f17) = 0.009994378;
+		ADJACENT-UP(f17,f18) = true;
+		ARRIVE-PARAM(f18) = 0.0042840308;
+		ADJACENT-UP(f18,f19) = true;
+		ARRIVE-PARAM(f19) = 0.008348952;
+		ADJACENT-UP(f19,f20) = true;
+		ARRIVE-PARAM(f20) = 0.00482368;
+		ADJACENT-UP(f20,f21) = true;
+		ARRIVE-PARAM(f21) = 0.0102247605;
+		ADJACENT-UP(f21,f22) = true;
+		ARRIVE-PARAM(f22) = 0.009718585;
+		ADJACENT-UP(f22,f23) = true;
+		ARRIVE-PARAM(f23) = 0.0077457833;
+		ADJACENT-UP(f23,f24) = true;
+		ARRIVE-PARAM(f24) = 0.008784794;
+		ADJACENT-UP(f24,f25) = true;
+		ARRIVE-PARAM(f25) = 0.008317953;
+		ADJACENT-UP(f25,f26) = true;
+		ARRIVE-PARAM(f26) = 0.006431111;
+		ADJACENT-UP(f26,f27) = true;
+		TOP-FLOOR(f27) = true;
+		BOTTOM-FLOOR(f0) = true;
+ 	}; 
+	init-state { 
+		elevator-at-floor(e0,f0);
+		elevator-at-floor(e1,f0);
+		elevator-at-floor(e2,f0);
+		elevator-at-floor(e3,f0);
+		elevator-at-floor(e4,f0);
+		elevator-at-floor(e5,f0);
+		elevator-at-floor(e6,f0);
+	};
+
+	horizon = 40;
+	discount = 1.0;
+} 

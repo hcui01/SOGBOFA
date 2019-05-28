@@ -15,7 +15,6 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import rddl.*;
 import rddl.RDDL.*;
 import rddl.competition.VisCounter;
-import rddl.competition.Team3;
 
 public abstract class Policy {
 	
