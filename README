@@ -40,7 +40,7 @@ HOW TO USE
 * Run the server
   One can either run a server from the RDDLSim Project, or run the Server class compiled from our source code with the following command
   ./run_server rddlfilename-or-dir portnumber num-rounds random-seed timeout 
-  For example:
+  For example: 
   ./run_server Domains 2323 100 1 10000
   Note that the time out is the total time (in seconds) allowed to any client connects to it.
 * Run SOGBOFA
