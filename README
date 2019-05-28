@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------
 OVERVIEW
 
-SOGBOFA is a state-fo-the-art stochastic online planning algorithm that specializes on MDPs that have large state and action spaces. It 
+SOGBOFA is a state-fo-the-art stochastic online planning algorithm that works well in MDPs that have large state and action spaces. It 
 uses the idea of "Aggregate Simulation" to build a computation graph which symbolically approximates the Q value of actions given the 
 current state, and searches the action space very efficiently using gradient updates. It supports various action constraints defined in 
 first-order predicates. It directly works with MDP domains defined in RDDL, and is implemented based on the original code of the RDDL 
@@ -13,14 +13,15 @@ simulator
 -------------------------------------------------------------------------
 NEWS
 
-* We fix the bugs and add supports to more action constraints. For more details, see our most recent ICAPS 2019 paper
+* We fixed some bugs and added support for more action constraints after IPC2018. For more details, see our most recent ICAPS 2019 paper
    http://homes.sice.indiana.edu/rkhardon/PUB/icaps2019-LCsogbofa.pdf
-  We are able to outperform the winner of IPC2018/2014/2011 with a large margin.
+  We are then able to outperform the winner of IPC2018/2014/2011 with a large margin.
 
-* The latest version of SOGBOFA with the new extention of "lifting" and "conformant" is the runner-up of the most recent IPC2018 
+* The latest version of SOGBOFA with the new extensions of "lifting" and "conformant" is the runner-up of the most recent IPC2018 
 competition. For more information, see the competition web page 
    https://ipc2018-probabilistic.bitbucket.io/ 
-  Note that since SOGBOFA did not fully support all the competition constraints by then, it crashed on quite some problems.
+  Note that since SOGBOFA did not fully support all the competition constraints by then, it crashed on quite some problems. The new 
+code supports all the constraints from the competition.
 
 -------------------------------------------------------------------------
 RELATED PAPERS
