@@ -68,7 +68,7 @@ HOW TO USE
   which record respectively the average score of the runs, the average depth of the search, the average size of the computation graph, 
   the average number of radnom restarts, the average number of action evaluated, the average number of gradient updates.
   The Score file has three numbers, respectively the instance index, the average cumulative reward, and the standard deviation. The other
-  files only has one number inside.
+  files each has only one number inside.
 
 -------------------------------------------------------------------------
 RDDL FILES FOR ICAPS2019 PAPER
