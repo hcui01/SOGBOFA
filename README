@@ -74,7 +74,7 @@ HOW TO USE
 RDDL FILES FOR ICAPS2019 PAPER
 
 Please find all domain and instance files that we used in the ICAPS 2019 paper in the Domains/ folder. It includes all IPC2018 
-competition problems and the elevators domain from IPC2014.
+competition problems, plus the elevators, traffic, skill_teaching and tamarisk from IPC2014.
 
 
 -------------------------------------------------------------------------
