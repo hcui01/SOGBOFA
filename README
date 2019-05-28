@@ -75,15 +75,17 @@ RDDL FILES READY TO USE
 
 Please find all domain and instance files that we used in the ICAPS 2019 paper in the Domains/ folder. It includes all IPC2018 
 competition problems, plus the elevators, traffic, skill_teaching and tamarisk from IPC2014. Of ourse you can alwalys define your own 
-problem using RDDL and run with SOGBOFA.
-
+problem using RDDL and run with our planner.
 
 -------------------------------------------------------------------------
 IJCAI2016 VERSION
 
 We have a copy of the source code used in the experiments of our IJCAI2016 paper (the very first SOGBOFA paper), but for consistency we 
 no longer maintain github page for that version. If you are interested, please contact bitcuihao@gmail.com and we'll directly send you 
-the code and instructions. 
+the code and instructions. Alternatively, you can run the latest code with no lifting or conformant, which is conceptually just the 2016
+version of SOGBOFA, with many bugs fixed and new constraints supported. To do that, you can type
+   ./run_sogbofa_original instance-name portnumber
+In that way, the names of the results files should begin with "SOGBOFA" instead of "L_C_SOGBOFA".
 
 -------------------------------------------------------------------------
 OTHER WORK
