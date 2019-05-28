@@ -58,7 +58,13 @@ HOW TO USE
   L_C_SOGBOFA_timeout_instance-name_updatesCounter
   which record respectively the average score of the runs, the average depth of the search, the average size of the computation graph, the average number of radnom restarts, the average number of action evaluated, the average number of gradient updates.
   The Score file has three numbers, respectively the instance index, the average cumulative reward, and the standard deviation. The other files only has one number inside.
-  
+
+-------------------------------------------------------------------------
+RDDL FILES FOR ICAPS2019 PAPER
+
+Please find all domain and instance files that we used in the ICAPS 2019 paper in the Domains/ folder. It includes all IPC2018 competition problems and the elevators domain from IPC2014.
+
+
 -------------------------------------------------------------------------
 IJCAI2016 VERSION
 
