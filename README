@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------
 OVERVIEW
 
-SOGBOFA is a state-fo-the-art stochastic online planning algorithm that works well in MDPs that have large state and action spaces. It 
+SOGBOFA is a state-of-the-art stochastic online planning algorithm that works well in MDPs that have large state and action spaces. It 
 uses the idea of "Aggregate Simulation" to build a computation graph which symbolically approximates the Q value of actions given the 
 current state, and searches the action space very efficiently using gradient updates. It supports various action constraints defined in 
 first-order predicates. It directly works with MDP domains defined in RDDL, and is implemented based on the original code of the RDDL 
