@@ -122,7 +122,7 @@ public class SOGBOFA {
 		double totalTimeForInit = 0;
 		
 		double TotalTimeAllowed = client.timeAllowed;//120 * totalStepLeft * 1000;
-		double emergentTime = 3.0 * totalStepLeft / (40 * 100); 
+		double emergentTime = 3.0 * totalStepLeft / (80 * 100); 
 		
 		
 		for( ; r < totalRounds; r++ ) {
