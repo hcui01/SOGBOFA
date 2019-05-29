@@ -122,6 +122,7 @@ public class SOGBOFA {
 		double totalTimeForInit = 0;
 		
 		double TotalTimeAllowed = client.timeAllowed;//120 * totalStepLeft * 1000;
+		double emergentTime = 3.0 * totalStepLeft / (40 * 100); 
 		
 		
 		for( ; r < totalRounds; r++ ) {
@@ -186,7 +187,7 @@ public class SOGBOFA {
 					System.out.println("Runs left: " + (totalRounds - r - 1));
 					System.out.println("time allowed: " + timeAllowed);
 					timeAllowed = timeAllowed - timePerInit * (totalRounds - r - 1);
-					if(timeAllowed < 1000 * 60 * 3) {
+					if(timeAllowed < 1000 * 60 * emergentTime) {
 						System.out.println("Emergent!! With time = " + timeAllowed);
 						ifEmeergency = true;
 					}
