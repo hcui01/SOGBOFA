@@ -92,4 +92,7 @@ OTHER WORK
 
 Checkout the other project that uses the similar idea of "Aggregate Simulation", but work on Bayesian Inference. 
   Link (https://github.com/hcui01/AGS)
+  
+Checkout the POMDP planner based on aggregate simulation.
+  Link (https://github.com/hcui01/SNAP)
 
